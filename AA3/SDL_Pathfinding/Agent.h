@@ -6,6 +6,7 @@
 #include "SDL_SimpleApp.h"
 #include "Path.h"
 #include "Vector2D.h"
+#include "Graph.h"
 #include "utils.h"
 
 
@@ -26,6 +27,7 @@ private:
 	Vector2D target;
 
 	// Pathfinding
+	Graph pathFindingGraph;
 	Path path;
 	int currentTargetIndex;
 

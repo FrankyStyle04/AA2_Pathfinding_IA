@@ -78,17 +78,14 @@ void Agent::setVelocity(Vector2D _velocity)
 
 void Agent::update(float dtime, SDL_Event *event)
 {
-
-	//cout << "agent update:" << endl;
-
-	switch (event->type) {
-		/* Keyboard & Mouse events */
-	case SDL_KEYDOWN:
-		if (event->key.keysym.scancode == SDL_SCANCODE_SPACE)
-			draw_sprite = !draw_sprite;
-		break;
-	default:
-		break;
+	switch (event->type)
+	{
+		case SDL_KEYDOWN:
+			if (event->key.keysym.scancode == SDL_SCANCODE_SPACE)
+				draw_sprite = !draw_sprite;
+			break;
+		default:
+			break;
 	}
 
 	// Apply the steering behavior
