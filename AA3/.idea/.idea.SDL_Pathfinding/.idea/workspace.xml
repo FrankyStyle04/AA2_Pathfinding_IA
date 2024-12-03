@@ -16,6 +16,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/SDL_Pathfinding/SearchVisualizer.h" root0="SKIP_HIGHLIGHTING" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -83,6 +86,7 @@
       <option name="presentableId" value="Default" />
       <updated>1733244359285</updated>
       <workItem from="1733244360700" duration="4418000" />
+      <workItem from="1733248862922" duration="211000" />
     </task>
     <servers />
   </component>
