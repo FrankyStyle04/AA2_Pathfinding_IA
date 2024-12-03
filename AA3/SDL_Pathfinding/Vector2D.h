@@ -83,6 +83,7 @@ struct Vector2D
 	{
 		return !operator==(rhs);
 	}
+
 	
 	inline Vector2D Normalize()
 	{
