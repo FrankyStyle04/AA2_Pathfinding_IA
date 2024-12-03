@@ -1,10 +1,2 @@
-﻿  Agent.cpp
-  Grid.cpp
-  main.cpp
-  PathFollowing.cpp
-  ScenePathFindingMouse.cpp
-  SDL_SimpleApp.cpp
-  Seek.cpp
-  utils.cpp
-  Generando código...
-  SDL_Pathfinding.vcxproj -> C:\Git\AA2_Pathfinding_IA\AA3\bin\SDL_Pathfinding.exe
+﻿  ScenePathFindingMouse.cpp
+  SDL_Pathfinding.vcxproj -> C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\bin\SDL_Pathfinding.exe

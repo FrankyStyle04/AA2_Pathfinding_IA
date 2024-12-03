@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string>
 #include <time.h>
+#include <queue>
+#include <unordered_map>
 #include "Scene.h"
 #include "Agent.h"
 #include "Seek.h"
@@ -31,5 +33,6 @@ private:
 	SDL_Texture *background_texture;
 	SDL_Texture *coin_texture;
 	bool loadTextures(char* filename_bg, char* filename_coin);
+	std::vector<Vector2D> BFS(Grid* grid, Vector2D start, Vector2D goal);
 
 };
