@@ -214,6 +214,7 @@
     <ClCompile Include="PathFollowing.cpp" />
     <ClCompile Include="ScenePathFindingMouse.cpp" />
     <ClCompile Include="SDL_SimpleApp.cpp" />
+    <ClCompile Include="SearchVisualizer.cpp" />
     <ClCompile Include="Seek.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
@@ -236,6 +237,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\maze.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SDL_Pathfinding\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
