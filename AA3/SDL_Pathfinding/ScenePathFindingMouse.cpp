@@ -85,22 +85,23 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event)
 
 }
 
-void ScenePathFindingMouse::draw()
-{
+void ScenePathFindingMouse::draw() {
 	drawMaze();
 	drawCoin();
 
-	if (draw_grid)
-	{
+	if (draw_grid) {
 		SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 255, 255, 127);
-		for (int i = 0; i < SRC_WIDTH; i += CELL_SIZE)
-		{
+		for (int i = 0; i < SRC_WIDTH; i += CELL_SIZE) {
 			SDL_RenderDrawLine(TheApp::Instance()->getRenderer(), i, 0, i, SRC_HEIGHT);
 		}
-		for (int j = 0; j < SRC_HEIGHT; j = j += CELL_SIZE)
-		{
+		for (int j = 0; j < SRC_HEIGHT; j = j += CELL_SIZE) {
 			SDL_RenderDrawLine(TheApp::Instance()->getRenderer(), 0, j, SRC_WIDTH, j);
 		}
+	}
+
+	// Dibujar la frontera din√°mica
+	for (Vector2D cell : frontier_dynamic) {
+		draw_circle(TheApp::Instance()->getRenderer(), (int)cell.x, (int)cell.y, 10, 255, 0, 0, 255);
 	}
 
 	agents[0]->draw();
@@ -183,14 +184,20 @@ std::vector<Vector2D> ScenePathFindingMouse::BFS(Grid* grid, Vector2D start, Vec
 	// Matriz para rastrear el camino
 	std::vector<std::vector<Vector2D>> came_from(grid->getNumCellY(), std::vector<Vector2D>(grid->getNumCellX(), Vector2D(-1, -1)));
 
+	// Almacena la frontera din√°mica
+	frontier_dynamic.clear();
+
 	while (!frontier.empty()) {
 		Vector2D current = frontier.front();
 		frontier.pop();
 
+		// A√±ade la celda actual a la frontera din√°mica
+		frontier_dynamic.push_back(grid->cell2pix(current));
+
 		if (current == goal)
 			break;
 
-		// Obtener vecinos v·lidos
+		// Obtener vecinos v√°lidos
 		std::vector<Vector2D> neighbors = {
 			Vector2D(current.x + 1, current.y),
 			Vector2D(current.x - 1, current.y),
@@ -209,8 +216,8 @@ std::vector<Vector2D> ScenePathFindingMouse::BFS(Grid* grid, Vector2D start, Vec
 	// Reconstruir el camino
 	std::vector<Vector2D> path;
 	if (came_from[(int)goal.y][(int)goal.x] == Vector2D(-1, -1)) {
-		std::cout << "No se encontrÛ un camino v·lido." << std::endl;
-		return path; // Devuelve un camino vacÌo si no hay conexiÛn
+		std::cout << "No se encontr√≥ un camino v√°lido." << std::endl;
+		return path; // Devuelve un camino vac√≠o si no hay conexi√≥n
 	}
 
 	for (Vector2D step = goal; step != start; step = came_from[(int)step.y][(int)step.x]) {
@@ -220,6 +227,7 @@ std::vector<Vector2D> ScenePathFindingMouse::BFS(Grid* grid, Vector2D start, Vec
 	std::reverse(path.begin(), path.end());
 	return path;
 }
+
 
 
 

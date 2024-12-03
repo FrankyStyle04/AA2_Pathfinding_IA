@@ -22,6 +22,7 @@ public:
 	void draw();
 	const char* getTitle();
 private:
+	std::vector<Vector2D> frontier_dynamic;
 	std::vector<Agent*> agents;
 	Vector2D coinPosition;
 
