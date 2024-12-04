@@ -11,10 +11,13 @@ void SearchVisualizer::reset() {
 }
 
 void SearchVisualizer::addToFrontier(Vector2D node) {
+    //Chequeamos si está en la grid
     if (!grid->isValidCell(node)) return;
+    
     frontier.push(node);
     dynamic_frontier.push_back(grid->cell2pix(node));
     nodes_added++;
+    
     std::cout << "Nodes afegits a la frontera: " << nodes_added << std::endl;
 }
 

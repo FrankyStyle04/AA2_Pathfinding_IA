@@ -1,8 +1,10 @@
 #include "ScenePathFindingMouse.h"
 
+#pragma region START
+
 ScenePathFindingMouse::ScenePathFindingMouse() {
     draw_grid = false;
-    maze = new Grid("../res/maze.csv");
+    grid = new Grid("../res/maze.csv");
 
     if (!loadTextures("../res/maze.png", "../res/coin.png")) {
         std::cerr << "Error: No se pudieron cargar las texturas." << std::endl;
@@ -20,19 +22,19 @@ ScenePathFindingMouse::ScenePathFindingMouse() {
 
     // Posicionar el agente en una celda aleatoria válida
     Vector2D rand_cell(-1, -1);
-    while (!maze->isValidCell(rand_cell)) {
-        rand_cell = Vector2D((float)(rand() % maze->getNumCellX()), (float)(rand() % maze->getNumCellY()));
+    while (!grid->isValidCell(rand_cell)) {
+        rand_cell = Vector2D((float)(rand() % grid->getNumCellX()), (float)(rand() % grid->getNumCellY()));
     }
-    agents[0]->setPosition(maze->cell2pix(rand_cell));
+    agents[0]->setPosition(grid->cell2pix(rand_cell));
 
     // Colocar la moneda en una celda aleatoria válida
     coinPosition = Vector2D(-1, -1);
-    while (!maze->isValidCell(coinPosition) || (Vector2D::Distance(coinPosition, rand_cell) < 3)) {
-        coinPosition = Vector2D((float)(rand() % maze->getNumCellX()), (float)(rand() % maze->getNumCellY()));
+    while (!grid->isValidCell(coinPosition) || (Vector2D::Distance(coinPosition, rand_cell) < 3)) {
+        coinPosition = Vector2D((float)(rand() % grid->getNumCellX()), (float)(rand() % grid->getNumCellY()));
     }
 
     // Crear el visualizador de búsqueda
-    search_visualizer = new SearchVisualizer(maze);
+    search_visualizer = new SearchVisualizer(grid);
 }
 
 ScenePathFindingMouse::~ScenePathFindingMouse() {
@@ -42,40 +44,117 @@ ScenePathFindingMouse::~ScenePathFindingMouse() {
     delete search_visualizer;
 }
 
-void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
-    if (event->type == SDL_MOUSEBUTTONDOWN && !bfs_in_progress && !click_locked) {
-        Vector2D clickedCell = maze->pix2cell(Vector2D((float)(event->button.x), (float)(event->button.y)));
-        if (maze->isValidCell(clickedCell)) {
-            Vector2D startCell = maze->pix2cell(agents[0]->getPosition());
-            startBFS(startCell, clickedCell);
-            click_target = maze->cell2pix(clickedCell);
-            click_locked = true;
+const char* ScenePathFindingMouse::getTitle() {
+    return "SDL Path Finding :: BFS";
+}
+
+#pragma endregion
+
+#pragma region BFS LOGIC
+
+void ScenePathFindingMouse::update(float dtime, SDL_Event* event)
+{
+    if (event->type == SDL_MOUSEBUTTONDOWN && !isStarted && !isClicking)
+    {
+        Vector2D clickedCell = grid->pix2cell(Vector2D((float)(event->button.x), (float)(event->button.y)));
+        
+        if (grid->isValidCell(clickedCell))
+        {
+            Vector2D startCell = grid->pix2cell(agents[0]->getPosition());
+            StartBestFirstSearch(startCell, clickedCell);
+            clickedTarget = grid->cell2pix(clickedCell);
+            isClicking = true;
         }
     }
 
-    if (bfs_in_progress && SDL_GetTicks() - last_bfs_step_time > bfs_delay) {
-        last_bfs_step_time = SDL_GetTicks();
-        if (stepBFS()) {
-            std::vector<Vector2D> path;
-            for (Vector2D step = bfs_goal; step != Vector2D(-1, -1); step = bfs_came_from[(int)step.y][(int)step.x]) {
-                path.push_back(maze->cell2pix(step));
-            }
-            std::reverse(path.begin(), path.end());
+    if (isStarted && SDL_GetTicks() - bfsStepTime > bfsDelay)
+    {
+        bfsStepTime = SDL_GetTicks();
 
+        //Si encuentra el objetivo
+        if (StepBestFirstSearch())
+        {
+            //Hacemos el camino del agente con el cameFrom
+            std::vector<Vector2D> path;
+            for (Vector2D step = target; step != Vector2D(-1, -1); step = cameFrom[(int)step.y][(int)step.x])
+            {
+                path.push_back(grid->cell2pix(step));
+            }
+            
+            std::reverse(path.begin(), path.end());
             agents[0]->clearPath();
-            for (Vector2D point : path) {
+            
+            for (Vector2D point : path)
+            {
                 agents[0]->addPathPoint(point);
             }
-
-            bfs_in_progress = false;
+            isStarted = false;
         }
-    } else if (!bfs_in_progress) {
+    }
+    else if (!isStarted)
+    {
         agents[0]->update(dtime, event);
-        if (maze->pix2cell(agents[0]->getPosition()) == maze->pix2cell(click_target)) {
-            click_locked = false;
+        if (grid->pix2cell(agents[0]->getPosition()) == grid->pix2cell(clickedTarget))
+        {
+            search_visualizer->reset();
+            isClicking = false;
         }
     }
 }
+
+void ScenePathFindingMouse::StartBestFirstSearch(Vector2D start, Vector2D goal) {
+    //Chequeamos que las celdas estén contenidas en la grid
+    if (!grid->isValidCell(start) || !grid->isValidCell(goal)) return;
+    isStarted = true;
+    target = goal;
+
+    //Restart the visual last search
+    search_visualizer->reset();
+
+    //Marcar las celdas como visitadas o no visitadas
+    visitedNodes = std::vector<std::vector<bool>>(grid->getNumCellY(), std::vector<bool>(grid->getNumCellX(), false));
+
+    //Guardamos las posiciones de las que vienes para poder reconstruir el camino
+    cameFrom = std::vector<std::vector<Vector2D>>(grid->getNumCellY(), std::vector<Vector2D>(grid->getNumCellX(), Vector2D(-1, -1)));
+
+    visitedNodes[(int)start.y][(int)start.x] = true;
+    
+    search_visualizer->addToFrontier(start);
+}
+
+bool ScenePathFindingMouse::StepBestFirstSearch() {
+    //Si no hay frontera devolvemos false
+    if (search_visualizer->isFrontierEmpty()) return false;
+    
+    Vector2D current = search_visualizer->popFrontier();
+
+    //Si el buscado es el target devolvemos true
+    if (current == target) return true;
+
+    //Miramos los vecinos
+    std::vector<Vector2D> neighbors = {
+        Vector2D(current.x + 1, current.y), Vector2D(current.x - 1, current.y),
+        Vector2D(current.x, current.y + 1), Vector2D(current.x, current.y - 1)
+    };
+
+    for (Vector2D next : neighbors)
+    {
+        if (next.x >= 0 && next.y >= 0 && next.x < grid->getNumCellX() && next.y < grid->getNumCellY())
+        {
+            if (grid->isValidCell(next) && !visitedNodes[(int)next.y][(int)next.x])
+            {
+                search_visualizer->addToFrontier(next);
+                visitedNodes[(int)next.y][(int)next.x] = true;
+                cameFrom[(int)next.y][(int)next.x] = current;
+            }
+        }
+    }
+    return false;
+}
+
+#pragma endregion
+
+#pragma region DRAWABLE
 
 void ScenePathFindingMouse::draw() {
     drawMaze();
@@ -86,53 +165,14 @@ void ScenePathFindingMouse::draw() {
     agents[0]->draw();
 }
 
-const char* ScenePathFindingMouse::getTitle() {
-    return "SDL Path Finding :: BFS";
-}
-
-void ScenePathFindingMouse::startBFS(Vector2D start, Vector2D goal) {
-    if (!maze->isValidCell(start) || !maze->isValidCell(goal)) return;
-    bfs_in_progress = true;
-    bfs_goal = goal;
-
-    search_visualizer->reset();
-    bfs_visited = std::vector<std::vector<bool>>(maze->getNumCellY(), std::vector<bool>(maze->getNumCellX(), false));
-    bfs_came_from = std::vector<std::vector<Vector2D>>(maze->getNumCellY(), std::vector<Vector2D>(maze->getNumCellX(), Vector2D(-1, -1)));
-    bfs_visited[(int)start.y][(int)start.x] = true;
-    search_visualizer->addToFrontier(start);
-}
-
-bool ScenePathFindingMouse::stepBFS() {
-    if (search_visualizer->isFrontierEmpty()) return false;
-
-    Vector2D current = search_visualizer->popFrontier();
-    if (current == bfs_goal) return true;
-
-    std::vector<Vector2D> neighbors = {
-        Vector2D(current.x + 1, current.y), Vector2D(current.x - 1, current.y),
-        Vector2D(current.x, current.y + 1), Vector2D(current.x, current.y - 1)
-    };
-
-    for (Vector2D next : neighbors) {
-        if (next.x >= 0 && next.y >= 0 && next.x < maze->getNumCellX() && next.y < maze->getNumCellY()) {
-            if (maze->isValidCell(next) && !bfs_visited[(int)next.y][(int)next.x]) {
-                search_visualizer->addToFrontier(next);
-                bfs_visited[(int)next.y][(int)next.x] = true;
-                bfs_came_from[(int)next.y][(int)next.x] = current;
-            }
-        }
-    }
-    return false;
-}
-
 void ScenePathFindingMouse::drawMaze() {
     SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 0, 0, 255, 255);
     SDL_Rect rect;
     Vector2D coords;
-    for (int j = 0; j < maze->getNumCellY(); j++) {
-        for (int i = 0; i < maze->getNumCellX(); i++) {
-            if (!maze->isValidCell(Vector2D((float)i, (float)j))) {
-                coords = maze->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
+    for (int j = 0; j < grid->getNumCellY(); j++) {
+        for (int i = 0; i < grid->getNumCellX(); i++) {
+            if (!grid->isValidCell(Vector2D((float)i, (float)j))) {
+                coords = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
                 rect = { (int)coords.x, (int)coords.y, CELL_SIZE, CELL_SIZE };
                 SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect);
             }
@@ -141,7 +181,7 @@ void ScenePathFindingMouse::drawMaze() {
 }
 
 void ScenePathFindingMouse::drawCoin() {
-    Vector2D coin_coords = maze->cell2pix(coinPosition);
+    Vector2D coin_coords = grid->cell2pix(coinPosition);
     int offset = CELL_SIZE / 2;
     SDL_Rect dstrect = { (int)coin_coords.x - offset, (int)coin_coords.y - offset, CELL_SIZE, CELL_SIZE };
     SDL_RenderCopy(TheApp::Instance()->getRenderer(), coin_texture, NULL, &dstrect);
@@ -160,3 +200,6 @@ bool ScenePathFindingMouse::loadTextures(char* filename_bg, char* filename_coin)
 
     return true;
 }
+
+#pragma endregion
+
