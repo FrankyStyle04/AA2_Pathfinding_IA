@@ -5,6 +5,6 @@
 class Graph
 {
 private:
-    std::vector< std::vector<Node*, float> > weights;
+    std::vector< std::vector<Node*> > weights;
     
 };

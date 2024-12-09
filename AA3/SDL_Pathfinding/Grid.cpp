@@ -2,13 +2,13 @@
 
 using namespace std;
 
-Grid::Grid(char* filename)
+Grid::Grid(char* wallsFilename, char* nodeWeightsFilename)
 {
 	num_cell_x = SRC_WIDTH / CELL_SIZE;
 	num_cell_y = SRC_HEIGHT / CELL_SIZE;
 
 	// Initialize the terrain matrix from file (for each cell a zero value indicates it's a wall, positive values indicate terrain cell cost)
-	std::ifstream infile(filename);
+	std::ifstream infile(wallsFilename);
 	std::string line;
 	while (std::getline(infile, line))
 	{
@@ -22,6 +22,31 @@ Grid::Grid(char* filename)
 	}
 	SDL_assert(terrain.size() == num_cell_y);
 	infile.close();
+
+
+	std::ifstream infile2(nodeWeightsFilename);
+	std::string line2;
+	int x = 0;
+	int y = 0;
+	while (std::getline(infile2, line2))
+	{
+		vector<Node*> nodeGrid_row;
+		std::stringstream lineStream(line2);
+		std::string cell;
+		while (std::getline(lineStream, cell, ',')) {
+
+			Node* node = new Node(x, y, atoi(cell.c_str()));
+			nodeGrid_row.push_back(node);
+			x += 1;
+		}
+		x = 0;
+		y += 1;
+
+		SDL_assert(nodeGrid_row.size() == num_cell_x);
+		nodeGrid.push_back(nodeGrid_row);
+	}
+	SDL_assert(nodeGrid.size() == num_cell_y);
+	infile2.close();
 }
 
 Grid::~Grid()
@@ -41,7 +66,7 @@ int Grid::getNumCellY()
 Vector2D Grid::cell2pix(Vector2D cell)
 {
 	int offset = CELL_SIZE / 2;
-	return Vector2D(cell.x*CELL_SIZE + offset, cell.y*CELL_SIZE + offset);
+	return Vector2D(cell.x * CELL_SIZE + offset, cell.y * CELL_SIZE + offset);
 }
 
 Vector2D Grid::pix2cell(Vector2D pix)

@@ -1,2 +1,3 @@
 ﻿  ScenePathFindingMouse.cpp
+C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\SDL_Pathfinding\ScenePathFindingMouse.cpp(70,51): warning C4018: '>': no coinciden signed/unsigned
   SDL_Pathfinding.vcxproj -> C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\bin\SDL_Pathfinding.exe

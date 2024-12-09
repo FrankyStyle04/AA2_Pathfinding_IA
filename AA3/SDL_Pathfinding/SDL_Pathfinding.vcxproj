@@ -237,6 +237,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\maze.csv" />
+    <None Include="NodeWeights.csv" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="SDL_Pathfinding\" />
