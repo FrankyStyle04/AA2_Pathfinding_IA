@@ -9,7 +9,7 @@
 class Grid
 {
 public:
-	Grid(char* filename);
+	Grid(char* wallsFilename, char* nodeWeightsFilename);
 	~Grid();
 
 private:
@@ -17,6 +17,7 @@ private:
 	int num_cell_y;
 
 	std::vector< std::vector<int> > terrain;
+	std::vector< std::vector<Node*> > nodeGrid;
 
 public:
 	Vector2D cell2pix(Vector2D cell);
@@ -24,4 +25,8 @@ public:
 	bool isValidCell(Vector2D cell);
 	int getNumCellX();
 	int getNumCellY();
+	Node* GetNode(int x, int y) {
+		
+		return nodeGrid[y][x];
+	}
 };
