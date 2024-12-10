@@ -66,6 +66,12 @@ private:
     bool isAStarRunning = false;
     Vector2D aStarGoal;
 
+    // GBFS variables
+    std::priority_queue<std::pair<float, Vector2D>, std::vector<std::pair<float, Vector2D>>, std::greater<>> gbfsFrontier;
+    std::map<Vector2D, Vector2D> gbfsCameFrom;
+    bool isGBFSRunning = false;
+    Vector2D gbfsGoal;
+
 
     //BFS REGION
     void BFSAlgorithm(Vector2D start, Vector2D goal);
@@ -79,8 +85,12 @@ private:
     void AStarAlgorithm(Vector2D start, Vector2D goal);
     bool StepA();
 
+    // GBFS REGION
+    void GBFSAlgorithm(Vector2D start, Vector2D goal);
+    bool StepGBFS();
+
     // Additionals
-    float heuristic(Vector2D goal, Vector2D next);
+    float heuristicManhattan(Vector2D goal, Vector2D next);
     
     void drawMaze();
     void drawCoin();
