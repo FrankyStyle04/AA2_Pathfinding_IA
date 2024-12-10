@@ -63,23 +63,24 @@ int Grid::getNumCellY()
 	return num_cell_y;
 }
 
-std::vector<Vector2D> Grid::getNeighbors(Vector2D cell)
-{
+std::vector<Vector2D> Grid::getNeighbors(Vector2D cell) {
 	std::vector<Vector2D> neighbors;
 
+	// Desplazamientos para vecinos (arriba, abajo, izquierda, derecha)
 	std::vector<Vector2D> directions = {
 		Vector2D(1, 0), Vector2D(-1, 0), Vector2D(0, 1), Vector2D(0, -1)
 	};
 
 	for (Vector2D dir : directions) {
 		Vector2D neighbor = cell + dir;
-		if (isValidCell(neighbor)) {
+		if (isValidCell(neighbor)) {  // Asegúrate de que es una celda válida
 			neighbors.push_back(neighbor);
 		}
 	}
 
 	return neighbors;
 }
+
 
 float Grid::getCost(Vector2D from, Vector2D to)
 {
