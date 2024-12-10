@@ -90,6 +90,8 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 				DijkstraAlgorithm(startCell, clickedCell);
 			} else if (currentAlgorithm == A) {
 				AStarAlgorithm(startCell, clickedCell);
+			} else if (currentAlgorithm == GBFS) {
+				GBFSAlgorithm(startCell, clickedCell);
 			}
 		}
 	}
@@ -153,6 +155,26 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 				agents[0]->addPathPoint(point);
 			}
 			isAStarRunning = false;
+		}
+	}
+
+	if (currentAlgorithm == GBFS && isGBFSRunning && SDL_GetTicks() - bfsStepTime > bfsDelay) {
+		bfsStepTime = SDL_GetTicks();
+		if (StepGBFS()) {
+			std::cout << "Camino encontrado con GBFS." << std::endl;
+			// Reconstrucción del camino
+			std::vector<Vector2D> path;
+			for (Vector2D step = gbfsGoal; step != gbfsCameFrom[step]; step = gbfsCameFrom[step]) {
+				path.push_back(grid->cell2pix(step));
+			}
+			std::reverse(path.begin(), path.end());
+
+			agents[0]->clearPath();
+			for (Vector2D point : path) {
+				agents[0]->addPathPoint(point);
+			}
+
+			isGBFSRunning = false;
 		}
 	}
 
@@ -320,7 +342,7 @@ bool ScenePathFindingMouse::StepA()
 		if (aStarCostSoFar.find(next) == aStarCostSoFar.end() || newCost < aStarCostSoFar[next]) {
 			aStarCostSoFar[next] = newCost;
 
-			float priority = newCost + heuristic(aStarGoal, next);
+			float priority = newCost + heuristicManhattan(aStarGoal, next);
 			aStarFrontier.emplace(priority, next);
 			aStarCameFrom[next] = current;
 
@@ -330,7 +352,7 @@ bool ScenePathFindingMouse::StepA()
 	return false;
 }
 
-float ScenePathFindingMouse::heuristic(Vector2D goal, Vector2D next)
+float ScenePathFindingMouse::heuristicManhattan(Vector2D goal, Vector2D next)
 {
 	return fabs(goal.x - next.x) + fabs(goal.y - next.y);  // Distancia Manhattan
 }
@@ -338,6 +360,54 @@ float ScenePathFindingMouse::heuristic(Vector2D goal, Vector2D next)
 #pragma endregion
 
 #pragma region GBFS LOGIC
+
+void ScenePathFindingMouse::GBFSAlgorithm(Vector2D start, Vector2D goal) {
+	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) {
+		std::cerr << "Error: Las celdas inicial o final no son válidas." << std::endl;
+		isGBFSRunning = false;
+		return;
+	}
+
+	search_visualizer->reset();
+	while (!gbfsFrontier.empty()) gbfsFrontier.pop();
+	gbfsCameFrom.clear();
+
+	gbfsFrontier.emplace(0.0f, start);
+	gbfsCameFrom[start] = start;
+
+	search_visualizer->addToFrontier(start);
+
+	gbfsGoal = goal;
+	isGBFSRunning = true;  // Activamos GBFS
+}
+
+bool ScenePathFindingMouse::StepGBFS()
+{
+	if (gbfsFrontier.empty()) {
+		isGBFSRunning = false;  // Finalizamos si no hay más nodos por explorar
+		return false;
+	}
+
+	Vector2D current = gbfsFrontier.top().second;
+	gbfsFrontier.pop();
+
+	if (current == gbfsGoal) {
+		isGBFSRunning = false;
+		return true;
+	}
+
+	// Explorar vecinos
+	for (Vector2D next : grid->getNeighbors(current)) {
+		if (gbfsCameFrom.find(next) == gbfsCameFrom.end()) {  // Evitar reexplorar nodos
+			float priority = heuristicManhattan(gbfsGoal, next);  // Solo se usa la heurística
+			gbfsFrontier.emplace(priority, next);
+			gbfsCameFrom[next] = current;
+
+			search_visualizer->addToFrontier(next);
+		}
+	}
+	return false;
+}
 
 #pragma endregion
 
