@@ -63,6 +63,33 @@ int Grid::getNumCellY()
 	return num_cell_y;
 }
 
+std::vector<Vector2D> Grid::getNeighbors(Vector2D cell)
+{
+	std::vector<Vector2D> neighbors;
+
+	std::vector<Vector2D> directions = {
+		Vector2D(1, 0), Vector2D(-1, 0), Vector2D(0, 1), Vector2D(0, -1)
+	};
+
+	for (Vector2D dir : directions) {
+		Vector2D neighbor = cell + dir;
+		if (isValidCell(neighbor)) {
+			neighbors.push_back(neighbor);
+		}
+	}
+
+	return neighbors;
+}
+
+float Grid::getCost(Vector2D from, Vector2D to)
+{
+	if (!isValidCell(from) || !isValidCell(to)) {
+		return std::numeric_limits<float>::infinity();
+	}
+
+	return static_cast<float>(nodeGrid[(int)to.y][(int)to.x]->getWeight());
+}
+
 Vector2D Grid::cell2pix(Vector2D cell)
 {
 	int offset = CELL_SIZE / 2;

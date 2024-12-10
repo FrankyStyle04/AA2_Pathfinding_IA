@@ -29,4 +29,7 @@ public:
 		
 		return nodeGrid[y][x];
 	}
+
+	std::vector<Vector2D> getNeighbors(Vector2D cell);
+	float getCost(Vector2D from, Vector2D to);
 };

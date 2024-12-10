@@ -33,6 +33,13 @@ struct Vector2D
 	{
 		return x * x + y * y;
 	}
+
+	// Dentro de la clase Vector2D
+	bool operator<(const Vector2D& other) const {
+		if (y < other.y) return true;
+		if (y == other.y && x < other.x) return true;
+		return false;
+	}
 	
 	inline Vector2D operator+(const Vector2D& v)
 	{
