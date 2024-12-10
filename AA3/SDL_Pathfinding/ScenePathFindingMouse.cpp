@@ -1,5 +1,7 @@
 #include "ScenePathFindingMouse.h"
 
+#include <map>
+
 #pragma region START
 
 ScenePathFindingMouse::ScenePathFindingMouse() {
@@ -50,107 +52,213 @@ const char* ScenePathFindingMouse::getTitle() {
 
 #pragma endregion
 
-#pragma region BFS LOGIC
+#pragma region UPDATE
 
-void ScenePathFindingMouse::update(float dtime, SDL_Event* event)
-{
-	if (event->type == SDL_MOUSEBUTTONDOWN && !isStarted && !isClicking)
-	{
-		Vector2D clickedCell = grid->pix2cell(Vector2D((float)(event->button.x), (float)(event->button.y)));
-
-		if (grid->isValidCell(clickedCell))
-		{
-			Vector2D startCell = grid->pix2cell(agents[0]->getPosition());
-			StartBestFirstSearch(startCell, clickedCell);
-			clickedTarget = grid->cell2pix(clickedCell);
-			isClicking = true;
+void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
+	if (event->type == SDL_KEYDOWN) {
+		switch (event->key.keysym.sym) {
+		case SDLK_b:
+			currentAlgorithm = BFS;
+			std::cout << "Cambiado a BFS." << std::endl;
+			break;
+		case SDLK_d:
+			currentAlgorithm = DIJKSTRA;
+			std::cout << "Cambiado a Dijkstra." << std::endl;
+			break;
+		case SDLK_a:
+			currentAlgorithm = A;
+			std::cout << "Cambiado a A*." << std::endl;
+			break;
+		case SDLK_g:
+			currentAlgorithm = GBFS;
+			std::cout << "Cambiado a GBFS." << std::endl;
+			break;
 		}
 	}
 
-	if (isStarted && SDL_GetTicks() - bfsStepTime > bfsDelay)
-	{
+	if (event->type == SDL_MOUSEBUTTONDOWN && !isStarted && !isClicking) {
+		Vector2D clickedCell = grid->pix2cell(Vector2D((float)(event->button.x), (float)(event->button.y)));
+
+		if (grid->isValidCell(clickedCell)) {
+			Vector2D startCell = grid->pix2cell(agents[0]->getPosition());
+			clickedTarget = grid->cell2pix(clickedCell);
+			isClicking = true;
+
+			if (currentAlgorithm == BFS) {
+				BFSAlgorithm(startCell, clickedCell);
+			} else if (currentAlgorithm == DIJKSTRA) {
+				DijkstraAlgorithm(startCell, clickedCell);
+			}
+		}
+	}
+
+	if (currentAlgorithm == BFS && isStarted && SDL_GetTicks() - bfsStepTime > bfsDelay) {
 		bfsStepTime = SDL_GetTicks();
 
-		//Si encuentra el objetivo
-		if (StepBestFirstSearch())
-		{
-			//Hacemos el camino del agente con el cameFrom
+		// Avanzar un paso del BFS
+		if (StepBestFirstSearch()) {
+			std::cout << "Camino encontrado con BFS." << std::endl;
+
+			// Reconstrucción del camino
 			std::vector<Vector2D> path;
-			for (Vector2D step = target; step != Vector2D(-1, -1); step = cameFrom[(int)step.y][(int)step.x])
-			{
+			for (Vector2D step = target; step != Vector2D(-1, -1); step = cameFrom[(int)step.y][(int)step.x]) {
 				path.push_back(grid->cell2pix(step));
 			}
 
 			std::reverse(path.begin(), path.end());
 			agents[0]->clearPath();
 
-			for (Vector2D point : path)
-			{
+			for (Vector2D point : path) {
 				agents[0]->addPathPoint(point);
 			}
+
 			isStarted = false;
 		}
 	}
-	else if (!isStarted)
-	{
-		agents[0]->update(dtime, event);
-		if (grid->pix2cell(agents[0]->getPosition()) == grid->pix2cell(clickedTarget))
-		{
-			search_visualizer->reset();
-			isClicking = false;
+
+	if (currentAlgorithm == DIJKSTRA && isDijkstraRunning && SDL_GetTicks() - bfsStepTime > bfsDelay) {
+		bfsStepTime = SDL_GetTicks();
+		if (StepDijkstra()) {
+			std::cout << "Camino encontrado con Dijkstra." << std::endl;
 		}
+	}
+
+
+	agents[0]->update(dtime, event);
+	if (!isStarted && !isDijkstraRunning && grid->pix2cell(agents[0]->getPosition()) == grid->pix2cell(clickedTarget)) {
+		search_visualizer->reset();
+		isClicking = false;
 	}
 }
 
-void ScenePathFindingMouse::StartBestFirstSearch(Vector2D start, Vector2D goal) {
-	//Chequeamos que las celdas estén contenidas en la grid
+#pragma endregion
+
+#pragma region BFS LOGIC
+
+
+void ScenePathFindingMouse::BFSAlgorithm(Vector2D start, Vector2D goal) {
 	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) return;
 	isStarted = true;
 	target = goal;
 
-	//Restart the visual last search
 	search_visualizer->reset();
 
-	//Marcar las celdas como visitadas o no visitadas
 	visitedNodes = std::vector<std::vector<bool>>(grid->getNumCellY(), std::vector<bool>(grid->getNumCellX(), false));
-
-	//Guardamos las posiciones de las que vienes para poder reconstruir el camino
 	cameFrom = std::vector<std::vector<Vector2D>>(grid->getNumCellY(), std::vector<Vector2D>(grid->getNumCellX(), Vector2D(-1, -1)));
-
 	visitedNodes[(int)start.y][(int)start.x] = true;
 
 	search_visualizer->addToFrontier(start);
 }
 
 bool ScenePathFindingMouse::StepBestFirstSearch() {
-	//Si no hay frontera devolvemos false
-	if (search_visualizer->isFrontierEmpty()) return false;
+	
+	if (search_visualizer->isFrontierEmpty()) {
+		isStarted = false;
+		return false;
+	}
 
 	Vector2D current = search_visualizer->popFrontier();
 
-	//Si el buscado es el target devolvemos true
-	if (current == target) return true;
+	if (current == target) {
+		isStarted = false;
+		return true;
+	}
 
-	//Miramos los vecinos
 	std::vector<Vector2D> neighbors = {
 		Vector2D(current.x + 1, current.y), Vector2D(current.x - 1, current.y),
 		Vector2D(current.x, current.y + 1), Vector2D(current.x, current.y - 1)
 	};
 
-	for (Vector2D next : neighbors)
-	{
-		if (next.x >= 0 && next.y >= 0 && next.x < grid->getNumCellX() && next.y < grid->getNumCellY())
-		{
-			if (grid->isValidCell(next) && !visitedNodes[(int)next.y][(int)next.x])
-			{
+	for (Vector2D next : neighbors) {
+		if (next.x >= 0 && next.y >= 0 && next.x < grid->getNumCellX() && next.y < grid->getNumCellY()) {
+			if (grid->isValidCell(next) && !visitedNodes[(int)next.y][(int)next.x]) {
 				search_visualizer->addToFrontier(next);
 				visitedNodes[(int)next.y][(int)next.x] = true;
 				cameFrom[(int)next.y][(int)next.x] = current;
 			}
 		}
 	}
+
 	return false;
 }
+
+
+#pragma endregion
+
+#pragma region DIJKSTRA LOGIC
+
+void ScenePathFindingMouse::DijkstraAlgorithm(Vector2D start, Vector2D goal) {
+	
+	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) {
+		std::cerr << "Error: Las celdas inicial o final no son válidas." << std::endl;
+		isDijkstraRunning = false;
+		return;
+	}
+	
+	search_visualizer->reset();
+	while (!dijkstraFrontier.empty()) dijkstraFrontier.pop();
+	dijkstraCameFrom.clear();
+	dijkstraCostSoFar.clear();
+
+	dijkstraFrontier.emplace(0.0f, start);
+	dijkstraCameFrom[start] = start;
+	dijkstraCostSoFar[start] = 0.0f;
+
+	search_visualizer->addToFrontier(start);
+
+	dijkstraGoal = goal;
+	isDijkstraRunning = true;  // Activamos Dijkstra
+}
+
+
+bool ScenePathFindingMouse::StepDijkstra() {
+	
+	if (dijkstraFrontier.empty()) {
+		isDijkstraRunning = false;
+		return false;
+	}
+
+	Vector2D current = dijkstraFrontier.top().second;
+	dijkstraFrontier.pop();
+
+	if (current == dijkstraGoal) {
+		
+		std::vector<Vector2D> path;
+		for (Vector2D step = dijkstraGoal; step != dijkstraCameFrom[step]; step = dijkstraCameFrom[step]) {
+			path.push_back(grid->cell2pix(step));
+		}
+		path.push_back(grid->cell2pix(current));
+		std::reverse(path.begin(), path.end());
+
+		agents[0]->clearPath();
+		for (Vector2D point : path) {
+			agents[0]->addPathPoint(point);
+		}
+
+		isDijkstraRunning = false;
+		return true;
+	}
+	
+	for (Vector2D next : grid->getNeighbors(current)) {
+		float newCost = dijkstraCostSoFar[current] + grid->getCost(current, next);
+		if (dijkstraCostSoFar.find(next) == dijkstraCostSoFar.end() || newCost < dijkstraCostSoFar[next]) {
+			dijkstraCostSoFar[next] = newCost;
+			dijkstraFrontier.emplace(newCost, next);
+			dijkstraCameFrom[next] = current;
+
+			search_visualizer->addToFrontier(next);
+		}
+	}
+	return false;
+}
+
+#pragma endregion
+
+#pragma region A* LOGIC
+
+#pragma endregion
+
+#pragma region GBFS LOGIC
 
 #pragma endregion
 
