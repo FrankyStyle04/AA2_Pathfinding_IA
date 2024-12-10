@@ -25,7 +25,7 @@ public:
 	bool isValidCell(Vector2D cell);
 	int getNumCellX();
 	int getNumCellY();
-	Node* GetNode(int x, int y) {
+	Node* getNode(int x, int y) {
 		
 		return nodeGrid[y][x];
 	}
