@@ -88,6 +88,8 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 				BFSAlgorithm(startCell, clickedCell);
 			} else if (currentAlgorithm == DIJKSTRA) {
 				DijkstraAlgorithm(startCell, clickedCell);
+			} else if (currentAlgorithm == A) {
+				AStarAlgorithm(startCell, clickedCell);
 			}
 		}
 	}
@@ -120,6 +122,37 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 		bfsStepTime = SDL_GetTicks();
 		if (StepDijkstra()) {
 			std::cout << "Camino encontrado con Dijkstra." << std::endl;
+			
+			std::vector<Vector2D> path;
+			for (Vector2D step = dijkstraGoal; step != dijkstraCameFrom[step]; step = dijkstraCameFrom[step]) {
+				path.push_back(grid->cell2pix(step));
+			}
+			std::reverse(path.begin(), path.end());
+
+			agents[0]->clearPath();
+			for (Vector2D point : path) {
+				agents[0]->addPathPoint(point);
+			}
+			isDijkstraRunning = false;
+		}
+	}
+
+	if (currentAlgorithm == A && isAStarRunning && SDL_GetTicks() - bfsStepTime > bfsDelay) {
+		bfsStepTime = SDL_GetTicks();
+		if (StepA()) {
+			std::cout << "Camino encontrado con A*." << std::endl;
+			// Reconstrucción del camino
+			std::vector<Vector2D> path;
+			for (Vector2D step = aStarGoal; step != aStarCameFrom[step]; step = aStarCameFrom[step]) {
+				path.push_back(grid->cell2pix(step));
+			}
+			std::reverse(path.begin(), path.end());
+
+			agents[0]->clearPath();
+			for (Vector2D point : path) {
+				agents[0]->addPathPoint(point);
+			}
+			isAStarRunning = false;
 		}
 	}
 
@@ -222,19 +255,6 @@ bool ScenePathFindingMouse::StepDijkstra() {
 	dijkstraFrontier.pop();
 
 	if (current == dijkstraGoal) {
-		
-		std::vector<Vector2D> path;
-		for (Vector2D step = dijkstraGoal; step != dijkstraCameFrom[step]; step = dijkstraCameFrom[step]) {
-			path.push_back(grid->cell2pix(step));
-		}
-		path.push_back(grid->cell2pix(current));
-		std::reverse(path.begin(), path.end());
-
-		agents[0]->clearPath();
-		for (Vector2D point : path) {
-			agents[0]->addPathPoint(point);
-		}
-
 		isDijkstraRunning = false;
 		return true;
 	}
@@ -255,6 +275,65 @@ bool ScenePathFindingMouse::StepDijkstra() {
 #pragma endregion
 
 #pragma region A* LOGIC
+
+void ScenePathFindingMouse::AStarAlgorithm(Vector2D start, Vector2D goal)
+{
+	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) {
+		std::cerr << "Error: Las celdas inicial o final no son válidas." << std::endl;
+		isAStarRunning = false;
+		return;
+	}
+
+	search_visualizer->reset();
+	while (!aStarFrontier.empty()) aStarFrontier.pop();
+	aStarCameFrom.clear();
+	aStarCostSoFar.clear();
+
+	aStarFrontier.emplace(0.0f, start);
+	aStarCameFrom[start] = start;
+	aStarCostSoFar[start] = 0.0f;
+
+	search_visualizer->addToFrontier(start);
+
+	aStarGoal = goal;
+	isAStarRunning = true;  // Activamos A*
+}
+
+bool ScenePathFindingMouse::StepA()
+{
+	if (aStarFrontier.empty()) {
+		isAStarRunning = false;  // Finalizamos si no hay más nodos por explorar
+		return false;
+	}
+
+	Vector2D current = aStarFrontier.top().second;
+	aStarFrontier.pop();
+
+	if (current == aStarGoal) {
+		isAStarRunning = false;
+		return true;
+	}
+
+	// Explorar vecinos
+	for (Vector2D next : grid->getNeighbors(current)) {
+		float newCost = aStarCostSoFar[current] + grid->getCost(current, next);
+		if (aStarCostSoFar.find(next) == aStarCostSoFar.end() || newCost < aStarCostSoFar[next]) {
+			aStarCostSoFar[next] = newCost;
+
+			float priority = newCost + heuristic(aStarGoal, next);
+			aStarFrontier.emplace(priority, next);
+			aStarCameFrom[next] = current;
+
+			search_visualizer->addToFrontier(next);
+		}
+	}
+	return false;
+}
+
+float ScenePathFindingMouse::heuristic(Vector2D goal, Vector2D next)
+{
+	return fabs(goal.x - next.x) + fabs(goal.y - next.y);  // Distancia Manhattan
+}
 
 #pragma endregion
 

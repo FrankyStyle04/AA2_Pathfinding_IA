@@ -59,6 +59,14 @@ private:
     bool isDijkstraRunning = false;
     Vector2D dijkstraGoal;
 
+    // A* variables
+    std::priority_queue<std::pair<float, Vector2D>, std::vector<std::pair<float, Vector2D>>, std::greater<>> aStarFrontier;
+    std::map<Vector2D, Vector2D> aStarCameFrom;
+    std::map<Vector2D, float> aStarCostSoFar;
+    bool isAStarRunning = false;
+    Vector2D aStarGoal;
+
+
     //BFS REGION
     void BFSAlgorithm(Vector2D start, Vector2D goal);
     bool StepBestFirstSearch();
@@ -66,7 +74,13 @@ private:
     //DIJKSTRA REGION
     void DijkstraAlgorithm(Vector2D start, Vector2D goal);
     bool StepDijkstra();
-    
+
+    //A REGION
+    void AStarAlgorithm(Vector2D start, Vector2D goal);
+    bool StepA();
+
+    // Additionals
+    float heuristic(Vector2D goal, Vector2D next);
     
     void drawMaze();
     void drawCoin();
