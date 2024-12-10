@@ -171,15 +171,13 @@ void ScenePathFindingMouse::drawMaze() {
 	for (int j = 0; j < grid->getNumCellY(); j++) {
 		for (int i = 0; i < grid->getNumCellX(); i++) {
 			if (!grid->isValidCell(Vector2D((float)i, (float)j))) {
-				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 0, 0, 100, 255);
-
+				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 5, 5, 5, 255);
 				coords = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
 				rect = { (int)coords.x, (int)coords.y, CELL_SIZE, CELL_SIZE };
 				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect);
 			}
 			else {
-				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 0, 100, 0, 255);
-
+				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 130, 211,130, 255);
 				coords = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
 				rect = { (int)coords.x, (int)coords.y, CELL_SIZE, CELL_SIZE };
 				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect);
@@ -193,16 +191,31 @@ void ScenePathFindingMouse::drawMaze() {
 	Vector2D coords2;
 	for (int j = 0; j < grid->getNumCellY(); j++) {
 		for (int i = 0; i < grid->getNumCellX(); i++) {
-			if (grid->GetNode(i, j)->getWeight() == 3) {
-				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255);
 
+			switch (grid->getNode(i, j)->getWeight()) {
+			case 2:
+				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 97, 175, 97, 255);
 				coords2 = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
 				rect2 = { (int)coords2.x, (int)coords2.y, CELL_SIZE, CELL_SIZE };
 				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
+				
+				break;
+			case 3:
+				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 58, 132, 58, 255);
+				coords2 = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
+				rect2 = { (int)coords2.x, (int)coords2.y, CELL_SIZE, CELL_SIZE };
+				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
+			
+				break;
+			case 4:
+				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 21, 81,21, 255);
+				coords2 = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
+				rect2 = { (int)coords2.x, (int)coords2.y, CELL_SIZE, CELL_SIZE };
+				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
+				break;
 			}
-			else {
-
-			}
+			
+		
 		}
 	}
 }
