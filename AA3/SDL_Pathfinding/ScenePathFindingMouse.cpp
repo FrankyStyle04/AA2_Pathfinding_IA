@@ -1,5 +1,4 @@
 #include "ScenePathFindingMouse.h"
-
 #include <map>
 
 #pragma region START
@@ -99,11 +98,9 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 	if (currentAlgorithm == BFS && isStarted && SDL_GetTicks() - bfsStepTime > bfsDelay) {
 		bfsStepTime = SDL_GetTicks();
 
-		// Avanzar un paso del BFS
 		if (StepBestFirstSearch()) {
 			std::cout << "Camino encontrado con BFS." << std::endl;
 
-			// Reconstrucción del camino
 			std::vector<Vector2D> path;
 			for (Vector2D step = target; step != Vector2D(-1, -1); step = cameFrom[(int)step.y][(int)step.x]) {
 				path.push_back(grid->cell2pix(step));
@@ -177,8 +174,7 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 			isGBFSRunning = false;
 		}
 	}
-
-
+	
 	agents[0]->update(dtime, event);
 	if (!isStarted && !isDijkstraRunning && grid->pix2cell(agents[0]->getPosition()) == grid->pix2cell(clickedTarget)) {
 		search_visualizer->reset();
