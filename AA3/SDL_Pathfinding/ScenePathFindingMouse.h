@@ -9,6 +9,7 @@
 #include "PathFollowing.h"
 #include "Grid.h"
 #include "SearchVisualizer.h"
+#include "Enemy.h"
 
 enum PathfindingAlgorithm {
     BFS,
@@ -71,6 +72,9 @@ private:
     std::map<Vector2D, Vector2D> gbfsCameFrom;
     bool isGBFSRunning = false;
     Vector2D gbfsGoal;
+
+    Enemy* enemy;
+    Enemy* enemy2;
 
 
     //BFS REGION

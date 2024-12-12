@@ -33,6 +33,8 @@ ScenePathFindingMouse::ScenePathFindingMouse() {
 	while (!grid->isValidCell(coinPosition) || (Vector2D::Distance(coinPosition, rand_cell) < 3)) {
 		coinPosition = Vector2D((float)(rand() % grid->getNumCellX()), (float)(rand() % grid->getNumCellY()));
 	}
+	enemy = new Enemy(Vector2D(7, 6), Vector2D(15, 6), 1.f); // Se mueve cada 0.5 segundos
+	enemy2 = new Enemy(Vector2D(23, 14), Vector2D(15, 14), 1.f); // Se mueve cada 0.5 segundos
 
 	// Crear el visualizador de búsqueda
 	search_visualizer = new SearchVisualizer(grid);
@@ -74,6 +76,17 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 			break;
 		}
 	}
+
+	enemy->update(dtime);
+	enemy2->update(dtime);
+
+	// Actualizar los pesos en la grilla
+	Vector2D enemyPos = enemy->getPosition();
+	grid->updateNodeWeights(enemyPos, 5, 4); // Rango de influencia y peso máximo
+
+	Vector2D enemyPos2 = enemy2->getPosition();
+	grid->updateNodeWeights(enemyPos2, 5, 4); 
+	
 
 	if (event->type == SDL_MOUSEBUTTONDOWN && !isStarted && !isClicking) {
 		Vector2D clickedCell = grid->pix2cell(Vector2D((float)(event->button.x), (float)(event->button.y)));
@@ -412,6 +425,20 @@ bool ScenePathFindingMouse::StepGBFS()
 void ScenePathFindingMouse::draw() {
 	drawMaze();
 	drawCoin();
+	// Dibujar al enemigo
+	Vector2D enemyPos = grid->cell2pix(enemy->getPosition());
+	int offset = CELL_SIZE / 2;
+	SDL_Rect rect = { (int)enemyPos.x - offset, (int)enemyPos.y - offset, CELL_SIZE, CELL_SIZE };
+	SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
+	SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect);
+
+	Vector2D enemyPos2 = grid->cell2pix(enemy2->getPosition());
+	int offset2 = CELL_SIZE / 2;
+	SDL_Rect rect2 = { (int)enemyPos2.x - offset2, (int)enemyPos2.y - offset2, CELL_SIZE, CELL_SIZE };
+	SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
+	SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
+
+
 	for (Vector2D cell : search_visualizer->getDynamicFrontier()) {
 		draw_circle(TheApp::Instance()->getRenderer(), (int)cell.x, (int)cell.y, 10, 255, 0, 0, 255);
 	}

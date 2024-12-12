@@ -20,9 +20,7 @@ private:
 	std::vector< std::vector<Node*> > nodeGrid;
 
 public:
-	Vector2D cell2pix(Vector2D cell);
-	Vector2D pix2cell(Vector2D pix);
-	bool isValidCell(Vector2D cell);
+	
 	int getNumCellX();
 	int getNumCellY();
 	Node* getNode(int x, int y) {
@@ -31,5 +29,10 @@ public:
 	}
 
 	std::vector<Vector2D> getNeighbors(Vector2D cell);
+	void updateNodeWeights(Vector2D enemyPos, int maxDistance, int maxWeight);
 	float getCost(Vector2D from, Vector2D to);
+
+	Vector2D cell2pix(Vector2D cell);
+	Vector2D pix2cell(Vector2D pix);
+	bool isValidCell(Vector2D cell);
 };
