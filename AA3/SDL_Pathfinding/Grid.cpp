@@ -81,6 +81,27 @@ std::vector<Vector2D> Grid::getNeighbors(Vector2D cell) {
 	return neighbors;
 }
 
+void Grid::updateNodeWeights(Vector2D enemyPos, int maxDistance, int maxWeight) {
+	for (int y = 0; y < num_cell_y; y++) {
+		for (int x = 0; x < num_cell_x; x++) {
+			Node* node = nodeGrid[y][x];
+
+			// Evitar modificar nodos con peso 0 (paredes)
+			if (node->getWeight() == 0) {
+				continue;
+			}
+
+			Vector2D nodePos(x, y);
+			int distance = (int)Vector2D::Distance(enemyPos, nodePos);
+
+			if (distance <= maxDistance) {
+				int newWeight = maxWeight - (distance * maxWeight) / maxDistance;
+				if (newWeight < 1) newWeight = 1; // Peso mínimo
+				node->setWeight(newWeight);
+			}
+		}
+	}
+}
 
 float Grid::getCost(Vector2D from, Vector2D to)
 {
