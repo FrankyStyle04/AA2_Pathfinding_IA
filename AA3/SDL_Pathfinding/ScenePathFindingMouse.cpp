@@ -86,7 +86,6 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 
 	Vector2D enemyPos2 = enemy2->getPosition();
 	grid->updateNodeWeights(enemyPos2, 5, 4); 
-	
 
 	if (event->type == SDL_MOUSEBUTTONDOWN && !isStarted && !isClicking) {
 		Vector2D clickedCell = grid->pix2cell(Vector2D((float)(event->button.x), (float)(event->button.y)));
@@ -199,7 +198,6 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 
 #pragma region BFS LOGIC
 
-
 void ScenePathFindingMouse::BFSAlgorithm(Vector2D start, Vector2D goal) {
 	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) return;
 	isStarted = true;
@@ -246,7 +244,6 @@ bool ScenePathFindingMouse::StepBestFirstSearch() {
 	return false;
 }
 
-
 #pragma endregion
 
 #pragma region DIJKSTRA LOGIC
@@ -273,7 +270,6 @@ void ScenePathFindingMouse::DijkstraAlgorithm(Vector2D start, Vector2D goal) {
 	dijkstraGoal = goal;
 	isDijkstraRunning = true;  // Activamos Dijkstra
 }
-
 
 bool ScenePathFindingMouse::StepDijkstra() {
 	

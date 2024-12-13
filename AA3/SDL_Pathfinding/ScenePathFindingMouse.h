@@ -27,8 +27,28 @@ public:
     void draw();
     const char* getTitle();
 
-private:
     SearchVisualizer* search_visualizer;
+
+    //BFS REGION
+    void BFSAlgorithm(Vector2D start, Vector2D goal);
+    bool StepBestFirstSearch();
+
+    //DIJKSTRA REGION
+    void DijkstraAlgorithm(Vector2D start, Vector2D goal);
+    bool StepDijkstra();
+
+    //A REGION
+    void AStarAlgorithm(Vector2D start, Vector2D goal);
+    bool StepA();
+
+    // GBFS REGION
+    void GBFSAlgorithm(Vector2D start, Vector2D goal);
+    bool StepGBFS();
+
+    Grid* grid;
+
+
+private:
     PathfindingAlgorithm currentAlgorithm = BFS;
 
     // Inputs
@@ -38,7 +58,6 @@ private:
     // Agent
     std::vector<Agent*> agents;
     Vector2D coinPosition;
-    Grid* grid;
 
     // Grafic configuration
     bool draw_grid = false;
@@ -75,23 +94,6 @@ private:
 
     Enemy* enemy;
     Enemy* enemy2;
-
-
-    //BFS REGION
-    void BFSAlgorithm(Vector2D start, Vector2D goal);
-    bool StepBestFirstSearch();
-
-    //DIJKSTRA REGION
-    void DijkstraAlgorithm(Vector2D start, Vector2D goal);
-    bool StepDijkstra();
-
-    //A REGION
-    void AStarAlgorithm(Vector2D start, Vector2D goal);
-    bool StepA();
-
-    // GBFS REGION
-    void GBFSAlgorithm(Vector2D start, Vector2D goal);
-    bool StepGBFS();
 
     // Additionals
     float heuristicManhattan(Vector2D goal, Vector2D next);
