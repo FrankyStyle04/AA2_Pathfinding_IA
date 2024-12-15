@@ -6,6 +6,8 @@
 #include "ScenePathFindingMouse.h"
 #include "SampleScene.h" // Incluir la clase SamplingScene
 
+#define SAMPLE_COUNT 20
+
 using namespace std;
 
 /*******************************************************************************
@@ -51,7 +53,7 @@ int main(int argc, char ** argv)
                 // Cambiar a la escena de muestreo y ejecutarla
                 delete curr_scene;
                 SampleScene* samplingScene = new SampleScene;
-                samplingScene->runSampling(20); // Ejecutar el muestreo con 20 instancias
+                samplingScene->runSampling(SAMPLE_COUNT); // Ejecutar el muestreo con 20 instancias
                 delete samplingScene;
 
                 // Restaurar la escena original después de la ejecución

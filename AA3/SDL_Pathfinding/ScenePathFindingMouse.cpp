@@ -50,6 +50,7 @@ ScenePathFindingMouse::ScenePathFindingMouse() {
 	}
 	enemy = new Enemy(Vector2D(7, 6), Vector2D(15, 6), 1.f); // Se mueve cada 0.5 segundos
 	enemy2 = new Enemy(Vector2D(23, 14), Vector2D(15, 14), 1.f); // Se mueve cada 0.5 segundos
+	enemy3 = new Enemy(Vector2D(15, 20), Vector2D(15, 20), 1.f); // Se mueve cada 0.5 segundos
 
 	// Crear el visualizador de búsqueda
 	search_visualizer = new SearchVisualizer(grid);
@@ -94,13 +95,17 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 
 	enemy->update(dtime);
 	enemy2->update(dtime);
+	enemy3->update(dtime);
 
 	// Actualizar los pesos en la grilla
 	Vector2D enemyPos = enemy->getPosition();
-	grid->updateNodeWeights(enemyPos, 5, 4); // Rango de influencia y peso máximo
+	grid->updateNodeWeights(enemyPos, 4, 50); // Rango de influencia y peso máximo
 
 	Vector2D enemyPos2 = enemy2->getPosition();
-	grid->updateNodeWeights(enemyPos2, 5, 4); 
+	grid->updateNodeWeights(enemyPos2, 4, 50); 
+
+	Vector2D enemyPos3 = enemy3->getPosition();
+	grid->updateNodeWeights(enemyPos3, 4, 50);
 
 	if (event->type == SDL_MOUSEBUTTONDOWN && !isStarted && !isClicking) {
 		Vector2D clickedCell = grid->pix2cell(Vector2D((float)(event->button.x), (float)(event->button.y)));
@@ -212,6 +217,24 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 		if ((agents[0]->getCurrentTargetIndex() == -1) && (grid->pix2cell(agents[0]->getPosition()) == coinsPositions[i])) {
 			// Moneda recogida, eliminarla del vector
 			coinsPositions.erase(coinsPositions.begin() + i);
+
+			if (!coinsPositions.empty()&&findAllCoins) {
+				// Encontrar la moneda más cercana
+				Vector2D currentPosition = grid->pix2cell(agents[0]->getPosition());
+				Vector2D closestCoin = coinsPositions[0];
+				float minDistance = heuristicManhattan(currentPosition, closestCoin);
+
+				for (const Vector2D& coin : coinsPositions) {
+					float distance = heuristicManhattan(currentPosition, coin);
+					if (distance < minDistance) {
+						closestCoin = coin;
+						minDistance = distance;
+					}
+				}
+
+				// Iniciar A* hacia la moneda más cercana
+				AStarAlgorithm(currentPosition, closestCoin);
+			}
 			break; // Salimos del bucle porque hemos modificado el vector
 		}
 	}
@@ -457,6 +480,12 @@ void ScenePathFindingMouse::draw() {
 	SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
 	SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
 
+	Vector2D enemyPos3 = grid->cell2pix(enemy3->getPosition());
+	int offset3 = CELL_SIZE / 2;
+	SDL_Rect rect3 = { (int)enemyPos3.x - offset3, (int)enemyPos3.y - offset3, CELL_SIZE, CELL_SIZE };
+	SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
+	SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect3);
+
 
 	for (Vector2D cell : search_visualizer->getDynamicFrontier()) {
 		draw_circle(TheApp::Instance()->getRenderer(), (int)cell.x, (int)cell.y, 10, 255, 0, 0, 255);
@@ -492,27 +521,29 @@ void ScenePathFindingMouse::drawMaze() {
 		for (int i = 0; i < grid->getNumCellX(); i++) {
 
 			switch (grid->getNode(i, j)->getWeight()) {
-			case 2:
+			case 13:
 				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 97, 175, 97, 255);
 				coords2 = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
 				rect2 = { (int)coords2.x, (int)coords2.y, CELL_SIZE, CELL_SIZE };
 				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
 				
 				break;
-			case 3:
+			case 25:
 				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 58, 132, 58, 255);
 				coords2 = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
 				rect2 = { (int)coords2.x, (int)coords2.y, CELL_SIZE, CELL_SIZE };
 				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
 			
 				break;
-			case 4:
+			case 38:
 				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 21, 81,21, 255);
 				coords2 = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
 				rect2 = { (int)coords2.x, (int)coords2.y, CELL_SIZE, CELL_SIZE };
 				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
 				break;
+		
 			}
+			
 			
 		
 		}
