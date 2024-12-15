@@ -57,7 +57,8 @@ private:
 
     // Agent
     std::vector<Agent*> agents;
-    Vector2D coinPosition;
+    std::vector<Vector2D> coinsPositions;
+    //Vector2D coinPosition;
 
     // Grafic configuration
     bool draw_grid = false;

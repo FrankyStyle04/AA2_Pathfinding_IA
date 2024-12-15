@@ -1,6 +1,8 @@
-﻿  ScenePathFindingMouse.cpp
-C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\SDL_Pathfinding\ScenePathFindingMouse.cpp(111,75): warning C4018: '>': no coinciden signed/unsigned
-C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\SDL_Pathfinding\ScenePathFindingMouse.cpp(133,88): warning C4018: '>': no coinciden signed/unsigned
-C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\SDL_Pathfinding\ScenePathFindingMouse.cpp(152,78): warning C4018: '>': no coinciden signed/unsigned
-C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\SDL_Pathfinding\ScenePathFindingMouse.cpp(171,80): warning C4018: '>': no coinciden signed/unsigned
+﻿  main.cpp
+  ScenePathFindingMouse.cpp
+C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\SDL_Pathfinding\ScenePathFindingMouse.cpp(125,75): warning C4018: '>': no coinciden signed/unsigned
+C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\SDL_Pathfinding\ScenePathFindingMouse.cpp(147,88): warning C4018: '>': no coinciden signed/unsigned
+C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\SDL_Pathfinding\ScenePathFindingMouse.cpp(166,78): warning C4018: '>': no coinciden signed/unsigned
+C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\SDL_Pathfinding\ScenePathFindingMouse.cpp(185,80): warning C4018: '>': no coinciden signed/unsigned
+  Generando código...
   SDL_Pathfinding.vcxproj -> C:\Users\marcc\Documents\GitHub\AA2_Pathfinding_IA\AA3\bin\SDL_Pathfinding.exe
