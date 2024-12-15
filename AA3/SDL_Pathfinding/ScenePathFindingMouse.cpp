@@ -90,6 +90,17 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 			currentAlgorithm = GBFS;
 			std::cout << "Cambiado a GBFS." << std::endl;
 			break;
+		case SDLK_3:
+			if(findAllCoins == false)
+			{
+				findAllCoins = true;
+				std::cout << "Find coins true";
+			}
+			else
+			{
+				findAllCoins = false;
+				std::cout << "Find coins false";
+			}
 		}
 	}
 
