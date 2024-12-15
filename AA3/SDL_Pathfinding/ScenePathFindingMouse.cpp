@@ -27,14 +27,30 @@ ScenePathFindingMouse::ScenePathFindingMouse() {
 		rand_cell = Vector2D((float)(rand() % grid->getNumCellX()), (float)(rand() % grid->getNumCellY()));
 	}
 	agents[0]->setPosition(grid->cell2pix(rand_cell));
-
+	
 	// Colocar la moneda en una celda aleatoria válida
-	coinPosition = Vector2D(-1, -1);
-	while (!grid->isValidCell(coinPosition) || (Vector2D::Distance(coinPosition, rand_cell) < 3)) {
-		coinPosition = Vector2D((float)(rand() % grid->getNumCellX()), (float)(rand() % grid->getNumCellY()));
+	while (coinsPositions.size() < 5) {
+		Vector2D coinPosition = Vector2D(-1, -1);
+		while (!grid->isValidCell(coinPosition)) {
+			coinPosition = Vector2D((float)(rand() % grid->getNumCellX()), (float)(rand() % grid->getNumCellY()));
+		}
+
+		// Verificar que no esté demasiado cerca de otras monedas ya generadas
+		bool tooClose = false;
+		for (const Vector2D& existingCoin : coinsPositions) {
+			if (Vector2D::Distance(coinPosition, existingCoin) < 3) {
+				tooClose = true;
+				break;
+			}
+		}
+
+		if (!tooClose) {
+			coinsPositions.push_back(coinPosition); // Añadir la posición al vector de monedas
+		}
 	}
 	enemy = new Enemy(Vector2D(7, 6), Vector2D(15, 6), 1.f); // Se mueve cada 0.5 segundos
 	enemy2 = new Enemy(Vector2D(23, 14), Vector2D(15, 14), 1.f); // Se mueve cada 0.5 segundos
+	enemy3 = new Enemy(Vector2D(15, 20), Vector2D(15, 20), 1.f); // Se mueve cada 0.5 segundos
 
 	// Crear el visualizador de búsqueda
 	search_visualizer = new SearchVisualizer(grid);
@@ -74,18 +90,33 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 			currentAlgorithm = GBFS;
 			std::cout << "Cambiado a GBFS." << std::endl;
 			break;
+		case SDLK_3:
+			if(findAllCoins == false)
+			{
+				findAllCoins = true;
+				std::cout << "Find coins true";
+			}
+			else
+			{
+				findAllCoins = false;
+				std::cout << "Find coins false";
+			}
 		}
 	}
 
 	enemy->update(dtime);
 	enemy2->update(dtime);
+	enemy3->update(dtime);
 
 	// Actualizar los pesos en la grilla
 	Vector2D enemyPos = enemy->getPosition();
-	grid->updateNodeWeights(enemyPos, 5, 4); // Rango de influencia y peso máximo
+	grid->updateNodeWeights(enemyPos, 4, 50); // Rango de influencia y peso máximo
 
 	Vector2D enemyPos2 = enemy2->getPosition();
-	grid->updateNodeWeights(enemyPos2, 5, 4); 
+	grid->updateNodeWeights(enemyPos2, 4, 50); 
+
+	Vector2D enemyPos3 = enemy3->getPosition();
+	grid->updateNodeWeights(enemyPos3, 4, 50);
 
 	if (event->type == SDL_MOUSEBUTTONDOWN && !isStarted && !isClicking) {
 		Vector2D clickedCell = grid->pix2cell(Vector2D((float)(event->button.x), (float)(event->button.y)));
@@ -191,6 +222,32 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 	if (!isStarted && !isDijkstraRunning && grid->pix2cell(agents[0]->getPosition()) == grid->pix2cell(clickedTarget)) {
 		search_visualizer->reset();
 		isClicking = false;
+	}
+
+	for (size_t i = 0; i < coinsPositions.size(); ++i) {
+		if ((agents[0]->getCurrentTargetIndex() == -1) && (grid->pix2cell(agents[0]->getPosition()) == coinsPositions[i])) {
+			// Moneda recogida, eliminarla del vector
+			coinsPositions.erase(coinsPositions.begin() + i);
+
+			if (!coinsPositions.empty()&&findAllCoins) {
+				// Encontrar la moneda más cercana
+				Vector2D currentPosition = grid->pix2cell(agents[0]->getPosition());
+				Vector2D closestCoin = coinsPositions[0];
+				float minDistance = heuristicManhattan(currentPosition, closestCoin);
+
+				for (const Vector2D& coin : coinsPositions) {
+					float distance = heuristicManhattan(currentPosition, coin);
+					if (distance < minDistance) {
+						closestCoin = coin;
+						minDistance = distance;
+					}
+				}
+
+				// Iniciar A* hacia la moneda más cercana
+				AStarAlgorithm(currentPosition, closestCoin);
+			}
+			break; // Salimos del bucle porque hemos modificado el vector
+		}
 	}
 }
 
@@ -434,6 +491,12 @@ void ScenePathFindingMouse::draw() {
 	SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
 	SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
 
+	Vector2D enemyPos3 = grid->cell2pix(enemy3->getPosition());
+	int offset3 = CELL_SIZE / 2;
+	SDL_Rect rect3 = { (int)enemyPos3.x - offset3, (int)enemyPos3.y - offset3, CELL_SIZE, CELL_SIZE };
+	SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
+	SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect3);
+
 
 	for (Vector2D cell : search_visualizer->getDynamicFrontier()) {
 		draw_circle(TheApp::Instance()->getRenderer(), (int)cell.x, (int)cell.y, 10, 255, 0, 0, 255);
@@ -469,27 +532,29 @@ void ScenePathFindingMouse::drawMaze() {
 		for (int i = 0; i < grid->getNumCellX(); i++) {
 
 			switch (grid->getNode(i, j)->getWeight()) {
-			case 2:
+			case 13:
 				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 97, 175, 97, 255);
 				coords2 = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
 				rect2 = { (int)coords2.x, (int)coords2.y, CELL_SIZE, CELL_SIZE };
 				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
 				
 				break;
-			case 3:
+			case 25:
 				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 58, 132, 58, 255);
 				coords2 = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
 				rect2 = { (int)coords2.x, (int)coords2.y, CELL_SIZE, CELL_SIZE };
 				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
 			
 				break;
-			case 4:
+			case 38:
 				SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 21, 81,21, 255);
 				coords2 = grid->cell2pix(Vector2D((float)i, (float)j)) - Vector2D((float)CELL_SIZE / 2, (float)CELL_SIZE / 2);
 				rect2 = { (int)coords2.x, (int)coords2.y, CELL_SIZE, CELL_SIZE };
 				SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
 				break;
+		
 			}
+			
 			
 		
 		}
@@ -497,11 +562,14 @@ void ScenePathFindingMouse::drawMaze() {
 }
 
 void ScenePathFindingMouse::drawCoin() {
-	Vector2D coin_coords = grid->cell2pix(coinPosition);
-	int offset = CELL_SIZE / 2;
-	SDL_Rect dstrect = { (int)coin_coords.x - offset, (int)coin_coords.y - offset, CELL_SIZE, CELL_SIZE };
-	SDL_RenderCopy(TheApp::Instance()->getRenderer(), coin_texture, NULL, &dstrect);
+	for (const Vector2D& coinPosition : coinsPositions) {
+		Vector2D coin_coords = grid->cell2pix(coinPosition);
+		int offset = CELL_SIZE / 2;
+		SDL_Rect dstrect = { (int)coin_coords.x - offset, (int)coin_coords.y - offset, CELL_SIZE, CELL_SIZE };
+		SDL_RenderCopy(TheApp::Instance()->getRenderer(), coin_texture, NULL, &dstrect);
+	}
 }
+
 
 bool ScenePathFindingMouse::loadTextures(char* filename_bg, char* filename_coin) {
 	SDL_Surface* image = IMG_Load(filename_bg);

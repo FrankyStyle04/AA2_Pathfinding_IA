@@ -1,0 +1,20 @@
+Resultados para BFS:
+Máximo de nodos explorados: 701
+Mínimo de nodos explorados: 19
+Promedio de nodos explorados: 366.1
+
+Resultados para Dijkstra:
+Máximo de nodos explorados: 705
+Mínimo de nodos explorados: 22
+Promedio de nodos explorados: 374.8
+
+Resultados para A*:
+Máximo de nodos explorados: 469
+Mínimo de nodos explorados: 12
+Promedio de nodos explorados: 128.05
+
+Resultados para GBFS:
+Máximo de nodos explorados: 111
+Mínimo de nodos explorados: 8
+Promedio de nodos explorados: 58.5
+

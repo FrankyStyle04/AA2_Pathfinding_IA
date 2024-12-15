@@ -54,10 +54,12 @@ private:
     // Inputs
     bool isClicking = false; 
     Vector2D clickedTarget = Vector2D(-1, -1); 
+    bool findAllCoins = false;
 
     // Agent
     std::vector<Agent*> agents;
-    Vector2D coinPosition;
+    std::vector<Vector2D> coinsPositions;
+    //Vector2D coinPosition;
 
     // Grafic configuration
     bool draw_grid = false;
@@ -94,6 +96,7 @@ private:
 
     Enemy* enemy;
     Enemy* enemy2;
+    Enemy* enemy3;
 
     // Additionals
     float heuristicManhattan(Vector2D goal, Vector2D next);
