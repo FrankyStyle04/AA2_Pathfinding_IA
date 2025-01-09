@@ -33,23 +33,23 @@ public:
             std::cout << "Inicio: (" << startCell.x << ", " << startCell.y << ")" << std::endl;
             std::cout << "Meta: (" << goalCell.x << ", " << goalCell.y << ")" << std::endl;
 
-            // BFS
-            search_visualizer->reset();
-            BFSAlgorithm(startCell, goalCell);
-            while (!StepBestFirstSearch());
-            bfsMetrics.exploredNodes.push_back(search_visualizer->getNodesAddedCount());
-
-            // Dijkstra
-            search_visualizer->reset();
-            DijkstraAlgorithm(startCell, goalCell);
-            while (!StepDijkstra());
-            dijkstraMetrics.exploredNodes.push_back(search_visualizer->getNodesAddedCount());
-
-            // A*
-            search_visualizer->reset();
-            AStarAlgorithm(startCell, goalCell);
-            while (!StepA());
-            aStarMetrics.exploredNodes.push_back(search_visualizer->getNodesAddedCount());
+            // // BFS
+            // search_visualizer->reset();
+            // BFSAlgorithm(startCell, goalCell);
+            // while (!StepBestFirstSearch());
+            // bfsMetrics.exploredNodes.push_back(search_visualizer->getNodesAddedCount());
+            //
+            // // Dijkstra
+            // search_visualizer->reset();
+            // DijkstraAlgorithm(startCell, goalCell);
+            // while (!StepDijkstra());
+            // dijkstraMetrics.exploredNodes.push_back(search_visualizer->getNodesAddedCount());
+            //
+            // // A*
+            // search_visualizer->reset();
+            // AStarAlgorithm(startCell, goalCell);
+            // while (!StepA());
+            // aStarMetrics.exploredNodes.push_back(search_visualizer->getNodesAddedCount());
 
             // GBFS
             search_visualizer->reset();

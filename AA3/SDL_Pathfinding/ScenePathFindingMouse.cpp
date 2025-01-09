@@ -48,9 +48,9 @@ ScenePathFindingMouse::ScenePathFindingMouse() {
 			coinsPositions.push_back(coinPosition); // Añadir la posición al vector de monedas
 		}
 	}
-	enemy = new Enemy(Vector2D(7, 6), Vector2D(15, 6), 1.f); // Se mueve cada 0.5 segundos
-	enemy2 = new Enemy(Vector2D(23, 14), Vector2D(15, 14), 1.f); // Se mueve cada 0.5 segundos
-	enemy3 = new Enemy(Vector2D(15, 20), Vector2D(15, 20), 1.f); // Se mueve cada 0.5 segundos
+	// enemy = new Enemy(Vector2D(7, 6), Vector2D(15, 6), 1.f); // Se mueve cada 0.5 segundos
+	// enemy2 = new Enemy(Vector2D(23, 14), Vector2D(15, 14), 1.f); // Se mueve cada 0.5 segundos
+	// enemy3 = new Enemy(Vector2D(15, 20), Vector2D(15, 20), 1.f); // Se mueve cada 0.5 segundos
 
 	// Crear el visualizador de búsqueda
 	search_visualizer = new SearchVisualizer(grid);
@@ -104,19 +104,19 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 		}
 	}
 
-	enemy->update(dtime);
-	enemy2->update(dtime);
-	enemy3->update(dtime);
+	// enemy->update(dtime);
+	// enemy2->update(dtime);
+	// enemy3->update(dtime);
 
-	// Actualizar los pesos en la grilla
-	Vector2D enemyPos = enemy->getPosition();
-	grid->updateNodeWeights(enemyPos, 4, 50); // Rango de influencia y peso máximo
-
-	Vector2D enemyPos2 = enemy2->getPosition();
-	grid->updateNodeWeights(enemyPos2, 4, 50); 
-
-	Vector2D enemyPos3 = enemy3->getPosition();
-	grid->updateNodeWeights(enemyPos3, 4, 50);
+	// // Actualizar los pesos en la grilla
+	// Vector2D enemyPos = enemy->getPosition();
+	// grid->updateNodeWeights(enemyPos, 4, 50); // Rango de influencia y peso máximo
+	//
+	// Vector2D enemyPos2 = enemy2->getPosition();
+	// grid->updateNodeWeights(enemyPos2, 4, 50); 
+	//
+	// Vector2D enemyPos3 = enemy3->getPosition();
+	// grid->updateNodeWeights(enemyPos3, 4, 50);
 
 	if (event->type == SDL_MOUSEBUTTONDOWN && !isStarted && !isClicking) {
 		Vector2D clickedCell = grid->pix2cell(Vector2D((float)(event->button.x), (float)(event->button.y)));
@@ -127,76 +127,76 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 			isClicking = true;
 
 			if (currentAlgorithm == BFS) {
-				BFSAlgorithm(startCell, clickedCell);
+				//BFSAlgorithm(startCell, clickedCell);
 			} else if (currentAlgorithm == DIJKSTRA) {
-				DijkstraAlgorithm(startCell, clickedCell);
+				//DijkstraAlgorithm(startCell, clickedCell);
 			} else if (currentAlgorithm == A) {
-				AStarAlgorithm(startCell, clickedCell);
+				//AStarAlgorithm(startCell, clickedCell);
 			} else if (currentAlgorithm == GBFS) {
 				GBFSAlgorithm(startCell, clickedCell);
 			}
 		}
 	}
 
-	if (currentAlgorithm == BFS && isStarted && SDL_GetTicks() - bfsStepTime > bfsDelay) {
-		bfsStepTime = SDL_GetTicks();
-
-		if (StepBestFirstSearch()) {
-			std::cout << "Camino encontrado con BFS." << std::endl;
-
-			std::vector<Vector2D> path;
-			for (Vector2D step = target; step != Vector2D(-1, -1); step = cameFrom[(int)step.y][(int)step.x]) {
-				path.push_back(grid->cell2pix(step));
-			}
-
-			std::reverse(path.begin(), path.end());
-			agents[0]->clearPath();
-
-			for (Vector2D point : path) {
-				agents[0]->addPathPoint(point);
-			}
-
-			isStarted = false;
-		}
-	}
-
-	if (currentAlgorithm == DIJKSTRA && isDijkstraRunning && SDL_GetTicks() - bfsStepTime > bfsDelay) {
-		bfsStepTime = SDL_GetTicks();
-		if (StepDijkstra()) {
-			std::cout << "Camino encontrado con Dijkstra." << std::endl;
-			
-			std::vector<Vector2D> path;
-			for (Vector2D step = dijkstraGoal; step != dijkstraCameFrom[step]; step = dijkstraCameFrom[step]) {
-				path.push_back(grid->cell2pix(step));
-			}
-			std::reverse(path.begin(), path.end());
-
-			agents[0]->clearPath();
-			for (Vector2D point : path) {
-				agents[0]->addPathPoint(point);
-			}
-			isDijkstraRunning = false;
-		}
-	}
-
-	if (currentAlgorithm == A && isAStarRunning && SDL_GetTicks() - bfsStepTime > bfsDelay) {
-		bfsStepTime = SDL_GetTicks();
-		if (StepA()) {
-			std::cout << "Camino encontrado con A*." << std::endl;
-			// Reconstrucción del camino
-			std::vector<Vector2D> path;
-			for (Vector2D step = aStarGoal; step != aStarCameFrom[step]; step = aStarCameFrom[step]) {
-				path.push_back(grid->cell2pix(step));
-			}
-			std::reverse(path.begin(), path.end());
-
-			agents[0]->clearPath();
-			for (Vector2D point : path) {
-				agents[0]->addPathPoint(point);
-			}
-			isAStarRunning = false;
-		}
-	}
+	// if (currentAlgorithm == BFS && isStarted && SDL_GetTicks() - bfsStepTime > bfsDelay) {
+	// 	bfsStepTime = SDL_GetTicks();
+	//
+	// 	if (StepBestFirstSearch()) {
+	// 		std::cout << "Camino encontrado con BFS." << std::endl;
+	//
+	// 		std::vector<Vector2D> path;
+	// 		for (Vector2D step = target; step != Vector2D(-1, -1); step = cameFrom[(int)step.y][(int)step.x]) {
+	// 			path.push_back(grid->cell2pix(step));
+	// 		}
+	//
+	// 		std::reverse(path.begin(), path.end());
+	// 		agents[0]->clearPath();
+	//
+	// 		for (Vector2D point : path) {
+	// 			agents[0]->addPathPoint(point);
+	// 		}
+	//
+	// 		isStarted = false;
+	// 	}
+	// }
+	//
+	// if (currentAlgorithm == DIJKSTRA && isDijkstraRunning && SDL_GetTicks() - bfsStepTime > bfsDelay) {
+	// 	bfsStepTime = SDL_GetTicks();
+	// 	if (StepDijkstra()) {
+	// 		std::cout << "Camino encontrado con Dijkstra." << std::endl;
+	// 		
+	// 		std::vector<Vector2D> path;
+	// 		for (Vector2D step = dijkstraGoal; step != dijkstraCameFrom[step]; step = dijkstraCameFrom[step]) {
+	// 			path.push_back(grid->cell2pix(step));
+	// 		}
+	// 		std::reverse(path.begin(), path.end());
+	//
+	// 		agents[0]->clearPath();
+	// 		for (Vector2D point : path) {
+	// 			agents[0]->addPathPoint(point);
+	// 		}
+	// 		isDijkstraRunning = false;
+	// 	}
+	// }
+	//
+	// if (currentAlgorithm == A && isAStarRunning && SDL_GetTicks() - bfsStepTime > bfsDelay) {
+	// 	bfsStepTime = SDL_GetTicks();
+	// 	if (StepA()) {
+	// 		std::cout << "Camino encontrado con A*." << std::endl;
+	// 		// Reconstrucción del camino
+	// 		std::vector<Vector2D> path;
+	// 		for (Vector2D step = aStarGoal; step != aStarCameFrom[step]; step = aStarCameFrom[step]) {
+	// 			path.push_back(grid->cell2pix(step));
+	// 		}
+	// 		std::reverse(path.begin(), path.end());
+	//
+	// 		agents[0]->clearPath();
+	// 		for (Vector2D point : path) {
+	// 			agents[0]->addPathPoint(point);
+	// 		}
+	// 		isAStarRunning = false;
+	// 	}
+	// }
 
 	if (currentAlgorithm == GBFS && isGBFSRunning && SDL_GetTicks() - bfsStepTime > bfsDelay) {
 		bfsStepTime = SDL_GetTicks();
@@ -243,8 +243,8 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 					}
 				}
 
-				// Iniciar A* hacia la moneda más cercana
-				AStarAlgorithm(currentPosition, closestCoin);
+				// // Iniciar A* hacia la moneda más cercana
+				// AStarAlgorithm(currentPosition, closestCoin);
 			}
 			break; // Salimos del bucle porque hemos modificado el vector
 		}
@@ -252,174 +252,174 @@ void ScenePathFindingMouse::update(float dtime, SDL_Event* event) {
 }
 
 #pragma endregion
-
-#pragma region BFS LOGIC
-
-void ScenePathFindingMouse::BFSAlgorithm(Vector2D start, Vector2D goal) {
-	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) return;
-	isStarted = true;
-	target = goal;
-
-	search_visualizer->reset();
-
-	visitedNodes = std::vector<std::vector<bool>>(grid->getNumCellY(), std::vector<bool>(grid->getNumCellX(), false));
-	cameFrom = std::vector<std::vector<Vector2D>>(grid->getNumCellY(), std::vector<Vector2D>(grid->getNumCellX(), Vector2D(-1, -1)));
-	visitedNodes[(int)start.y][(int)start.x] = true;
-
-	search_visualizer->addToFrontier(start);
-}
-
-bool ScenePathFindingMouse::StepBestFirstSearch() {
-	
-	if (search_visualizer->isFrontierEmpty()) {
-		isStarted = false;
-		return false;
-	}
-
-	Vector2D current = search_visualizer->popFrontier();
-
-	if (current == target) {
-		isStarted = false;
-		return true;
-	}
-
-	std::vector<Vector2D> neighbors = {
-		Vector2D(current.x + 1, current.y), Vector2D(current.x - 1, current.y),
-		Vector2D(current.x, current.y + 1), Vector2D(current.x, current.y - 1)
-	};
-
-	for (Vector2D next : neighbors) {
-		if (next.x >= 0 && next.y >= 0 && next.x < grid->getNumCellX() && next.y < grid->getNumCellY()) {
-			if (grid->isValidCell(next) && !visitedNodes[(int)next.y][(int)next.x]) {
-				search_visualizer->addToFrontier(next);
-				visitedNodes[(int)next.y][(int)next.x] = true;
-				cameFrom[(int)next.y][(int)next.x] = current;
-			}
-		}
-	}
-
-	return false;
-}
-
-#pragma endregion
-
-#pragma region DIJKSTRA LOGIC
-
-void ScenePathFindingMouse::DijkstraAlgorithm(Vector2D start, Vector2D goal) {
-	
-	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) {
-		std::cerr << "Error: Las celdas inicial o final no son válidas." << std::endl;
-		isDijkstraRunning = false;
-		return;
-	}
-	
-	search_visualizer->reset();
-	while (!dijkstraFrontier.empty()) dijkstraFrontier.pop();
-	dijkstraCameFrom.clear();
-	dijkstraCostSoFar.clear();
-
-	dijkstraFrontier.emplace(0.0f, start);
-	dijkstraCameFrom[start] = start;
-	dijkstraCostSoFar[start] = 0.0f;
-
-	search_visualizer->addToFrontier(start);
-
-	dijkstraGoal = goal;
-	isDijkstraRunning = true;  // Activamos Dijkstra
-}
-
-bool ScenePathFindingMouse::StepDijkstra() {
-	
-	if (dijkstraFrontier.empty()) {
-		isDijkstraRunning = false;
-		return false;
-	}
-
-	Vector2D current = dijkstraFrontier.top().second;
-	dijkstraFrontier.pop();
-
-	if (current == dijkstraGoal) {
-		isDijkstraRunning = false;
-		return true;
-	}
-	
-	for (Vector2D next : grid->getNeighbors(current)) {
-		float newCost = dijkstraCostSoFar[current] + grid->getCost(current, next);
-		if (dijkstraCostSoFar.find(next) == dijkstraCostSoFar.end() || newCost < dijkstraCostSoFar[next]) {
-			dijkstraCostSoFar[next] = newCost;
-			dijkstraFrontier.emplace(newCost, next);
-			dijkstraCameFrom[next] = current;
-
-			search_visualizer->addToFrontier(next);
-		}
-	}
-	return false;
-}
-
-#pragma endregion
-
-#pragma region A* LOGIC
-
-void ScenePathFindingMouse::AStarAlgorithm(Vector2D start, Vector2D goal)
-{
-	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) {
-		std::cerr << "Error: Las celdas inicial o final no son válidas." << std::endl;
-		isAStarRunning = false;
-		return;
-	}
-
-	search_visualizer->reset();
-	while (!aStarFrontier.empty()) aStarFrontier.pop();
-	aStarCameFrom.clear();
-	aStarCostSoFar.clear();
-
-	aStarFrontier.emplace(0.0f, start);
-	aStarCameFrom[start] = start;
-	aStarCostSoFar[start] = 0.0f;
-
-	search_visualizer->addToFrontier(start);
-
-	aStarGoal = goal;
-	isAStarRunning = true;  // Activamos A*
-}
-
-bool ScenePathFindingMouse::StepA()
-{
-	if (aStarFrontier.empty()) {
-		isAStarRunning = false;  // Finalizamos si no hay más nodos por explorar
-		return false;
-	}
-
-	Vector2D current = aStarFrontier.top().second;
-	aStarFrontier.pop();
-
-	if (current == aStarGoal) {
-		isAStarRunning = false;
-		return true;
-	}
-
-	// Explorar vecinos
-	for (Vector2D next : grid->getNeighbors(current)) {
-		float newCost = aStarCostSoFar[current] + grid->getCost(current, next);
-		if (aStarCostSoFar.find(next) == aStarCostSoFar.end() || newCost < aStarCostSoFar[next]) {
-			aStarCostSoFar[next] = newCost;
-
-			float priority = newCost + heuristicManhattan(aStarGoal, next);
-			aStarFrontier.emplace(priority, next);
-			aStarCameFrom[next] = current;
-
-			search_visualizer->addToFrontier(next);
-		}
-	}
-	return false;
-}
-
+//
+// #pragma region BFS LOGIC
+//
+// void ScenePathFindingMouse::BFSAlgorithm(Vector2D start, Vector2D goal) {
+// 	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) return;
+// 	isStarted = true;
+// 	target = goal;
+//
+// 	search_visualizer->reset();
+//
+// 	visitedNodes = std::vector<std::vector<bool>>(grid->getNumCellY(), std::vector<bool>(grid->getNumCellX(), false));
+// 	cameFrom = std::vector<std::vector<Vector2D>>(grid->getNumCellY(), std::vector<Vector2D>(grid->getNumCellX(), Vector2D(-1, -1)));
+// 	visitedNodes[(int)start.y][(int)start.x] = true;
+//
+// 	search_visualizer->addToFrontier(start);
+// }
+//
+// bool ScenePathFindingMouse::StepBestFirstSearch() {
+// 	
+// 	if (search_visualizer->isFrontierEmpty()) {
+// 		isStarted = false;
+// 		return false;
+// 	}
+//
+// 	Vector2D current = search_visualizer->popFrontier();
+//
+// 	if (current == target) {
+// 		isStarted = false;
+// 		return true;
+// 	}
+//
+// 	std::vector<Vector2D> neighbors = {
+// 		Vector2D(current.x + 1, current.y), Vector2D(current.x - 1, current.y),
+// 		Vector2D(current.x, current.y + 1), Vector2D(current.x, current.y - 1)
+// 	};
+//
+// 	for (Vector2D next : neighbors) {
+// 		if (next.x >= 0 && next.y >= 0 && next.x < grid->getNumCellX() && next.y < grid->getNumCellY()) {
+// 			if (grid->isValidCell(next) && !visitedNodes[(int)next.y][(int)next.x]) {
+// 				search_visualizer->addToFrontier(next);
+// 				visitedNodes[(int)next.y][(int)next.x] = true;
+// 				cameFrom[(int)next.y][(int)next.x] = current;
+// 			}
+// 		}
+// 	}
+//
+// 	return false;
+// }
+//
+// #pragma endregion
+//
+// #pragma region DIJKSTRA LOGIC
+//
+// void ScenePathFindingMouse::DijkstraAlgorithm(Vector2D start, Vector2D goal) {
+// 	
+// 	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) {
+// 		std::cerr << "Error: Las celdas inicial o final no son válidas." << std::endl;
+// 		isDijkstraRunning = false;
+// 		return;
+// 	}
+// 	
+// 	search_visualizer->reset();
+// 	while (!dijkstraFrontier.empty()) dijkstraFrontier.pop();
+// 	dijkstraCameFrom.clear();
+// 	dijkstraCostSoFar.clear();
+//
+// 	dijkstraFrontier.emplace(0.0f, start);
+// 	dijkstraCameFrom[start] = start;
+// 	dijkstraCostSoFar[start] = 0.0f;
+//
+// 	search_visualizer->addToFrontier(start);
+//
+// 	dijkstraGoal = goal;
+// 	isDijkstraRunning = true;  // Activamos Dijkstra
+// }
+//
+// bool ScenePathFindingMouse::StepDijkstra() {
+// 	
+// 	if (dijkstraFrontier.empty()) {
+// 		isDijkstraRunning = false;
+// 		return false;
+// 	}
+//
+// 	Vector2D current = dijkstraFrontier.top().second;
+// 	dijkstraFrontier.pop();
+//
+// 	if (current == dijkstraGoal) {
+// 		isDijkstraRunning = false;
+// 		return true;
+// 	}
+// 	
+// 	for (Vector2D next : grid->getNeighbors(current)) {
+// 		float newCost = dijkstraCostSoFar[current] + grid->getCost(current, next);
+// 		if (dijkstraCostSoFar.find(next) == dijkstraCostSoFar.end() || newCost < dijkstraCostSoFar[next]) {
+// 			dijkstraCostSoFar[next] = newCost;
+// 			dijkstraFrontier.emplace(newCost, next);
+// 			dijkstraCameFrom[next] = current;
+//
+// 			search_visualizer->addToFrontier(next);
+// 		}
+// 	}
+// 	return false;
+// }
+//
+// #pragma endregion
+//
+// #pragma region A* LOGIC
+//
+// void ScenePathFindingMouse::AStarAlgorithm(Vector2D start, Vector2D goal)
+// {
+// 	if (!grid->isValidCell(start) || !grid->isValidCell(goal)) {
+// 		std::cerr << "Error: Las celdas inicial o final no son válidas." << std::endl;
+// 		isAStarRunning = false;
+// 		return;
+// 	}
+//
+// 	search_visualizer->reset();
+// 	while (!aStarFrontier.empty()) aStarFrontier.pop();
+// 	aStarCameFrom.clear();
+// 	aStarCostSoFar.clear();
+//
+// 	aStarFrontier.emplace(0.0f, start);
+// 	aStarCameFrom[start] = start;
+// 	aStarCostSoFar[start] = 0.0f;
+//
+// 	search_visualizer->addToFrontier(start);
+//
+// 	aStarGoal = goal;
+// 	isAStarRunning = true;  // Activamos A*
+// }
+//
+// bool ScenePathFindingMouse::StepA()
+// {
+// 	if (aStarFrontier.empty()) {
+// 		isAStarRunning = false;  // Finalizamos si no hay más nodos por explorar
+// 		return false;
+// 	}
+//
+// 	Vector2D current = aStarFrontier.top().second;
+// 	aStarFrontier.pop();
+//
+// 	if (current == aStarGoal) {
+// 		isAStarRunning = false;
+// 		return true;
+// 	}
+//
+// 	// Explorar vecinos
+// 	for (Vector2D next : grid->getNeighbors(current)) {
+// 		float newCost = aStarCostSoFar[current] + grid->getCost(current, next);
+// 		if (aStarCostSoFar.find(next) == aStarCostSoFar.end() || newCost < aStarCostSoFar[next]) {
+// 			aStarCostSoFar[next] = newCost;
+//
+// 			float priority = newCost + heuristicManhattan(aStarGoal, next);
+// 			aStarFrontier.emplace(priority, next);
+// 			aStarCameFrom[next] = current;
+//
+// 			search_visualizer->addToFrontier(next);
+// 		}
+// 	}
+// 	return false;
+// }
+//
 float ScenePathFindingMouse::heuristicManhattan(Vector2D goal, Vector2D next)
 {
 	return fabs(goal.x - next.x) + fabs(goal.y - next.y);  // Distancia Manhattan
 }
-
-#pragma endregion
+//
+// #pragma endregion
 
 #pragma region GBFS LOGIC
 
@@ -478,24 +478,24 @@ bool ScenePathFindingMouse::StepGBFS()
 void ScenePathFindingMouse::draw() {
 	drawMaze();
 	drawCoin();
-	// Dibujar al enemigo
-	Vector2D enemyPos = grid->cell2pix(enemy->getPosition());
-	int offset = CELL_SIZE / 2;
-	SDL_Rect rect = { (int)enemyPos.x - offset, (int)enemyPos.y - offset, CELL_SIZE, CELL_SIZE };
-	SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
-	SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect);
-
-	Vector2D enemyPos2 = grid->cell2pix(enemy2->getPosition());
-	int offset2 = CELL_SIZE / 2;
-	SDL_Rect rect2 = { (int)enemyPos2.x - offset2, (int)enemyPos2.y - offset2, CELL_SIZE, CELL_SIZE };
-	SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
-	SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
-
-	Vector2D enemyPos3 = grid->cell2pix(enemy3->getPosition());
-	int offset3 = CELL_SIZE / 2;
-	SDL_Rect rect3 = { (int)enemyPos3.x - offset3, (int)enemyPos3.y - offset3, CELL_SIZE, CELL_SIZE };
-	SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
-	SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect3);
+	// // Dibujar al enemigo
+	// Vector2D enemyPos = grid->cell2pix(enemy->getPosition());
+	// int offset = CELL_SIZE / 2;
+	// SDL_Rect rect = { (int)enemyPos.x - offset, (int)enemyPos.y - offset, CELL_SIZE, CELL_SIZE };
+	// SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
+	// SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect);
+	//
+	// Vector2D enemyPos2 = grid->cell2pix(enemy2->getPosition());
+	// int offset2 = CELL_SIZE / 2;
+	// SDL_Rect rect2 = { (int)enemyPos2.x - offset2, (int)enemyPos2.y - offset2, CELL_SIZE, CELL_SIZE };
+	// SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
+	// SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect2);
+	//
+	// Vector2D enemyPos3 = grid->cell2pix(enemy3->getPosition());
+	// int offset3 = CELL_SIZE / 2;
+	// SDL_Rect rect3 = { (int)enemyPos3.x - offset3, (int)enemyPos3.y - offset3, CELL_SIZE, CELL_SIZE };
+	// SDL_SetRenderDrawColor(TheApp::Instance()->getRenderer(), 255, 0, 0, 255); // Rojo
+	// SDL_RenderFillRect(TheApp::Instance()->getRenderer(), &rect3);
 
 
 	for (Vector2D cell : search_visualizer->getDynamicFrontier()) {
@@ -562,12 +562,12 @@ void ScenePathFindingMouse::drawMaze() {
 }
 
 void ScenePathFindingMouse::drawCoin() {
-	for (const Vector2D& coinPosition : coinsPositions) {
-		Vector2D coin_coords = grid->cell2pix(coinPosition);
-		int offset = CELL_SIZE / 2;
-		SDL_Rect dstrect = { (int)coin_coords.x - offset, (int)coin_coords.y - offset, CELL_SIZE, CELL_SIZE };
-		SDL_RenderCopy(TheApp::Instance()->getRenderer(), coin_texture, NULL, &dstrect);
-	}
+	// for (const Vector2D& coinPosition : coinsPositions) {
+	// 	Vector2D coin_coords = grid->cell2pix(coinPosition);
+	// 	int offset = CELL_SIZE / 2;
+	// 	SDL_Rect dstrect = { (int)coin_coords.x - offset, (int)coin_coords.y - offset, CELL_SIZE, CELL_SIZE };
+	// 	SDL_RenderCopy(TheApp::Instance()->getRenderer(), coin_texture, NULL, &dstrect);
+	// }
 }
 
 

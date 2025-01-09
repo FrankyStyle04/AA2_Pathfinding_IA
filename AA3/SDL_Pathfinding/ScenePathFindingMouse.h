@@ -49,7 +49,7 @@ public:
 
 
 private:
-    PathfindingAlgorithm currentAlgorithm = BFS;
+    PathfindingAlgorithm currentAlgorithm = GBFS;
 
     // Inputs
     bool isClicking = false; 
