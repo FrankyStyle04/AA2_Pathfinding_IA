@@ -562,12 +562,12 @@ void ScenePathFindingMouse::drawMaze() {
 }
 
 void ScenePathFindingMouse::drawCoin() {
-	for (const Vector2D& coinPosition : coinsPositions) {
-		Vector2D coin_coords = grid->cell2pix(coinPosition);
-		int offset = CELL_SIZE / 2;
-		SDL_Rect dstrect = { (int)coin_coords.x - offset, (int)coin_coords.y - offset, CELL_SIZE, CELL_SIZE };
-		SDL_RenderCopy(TheApp::Instance()->getRenderer(), coin_texture, NULL, &dstrect);
-	}
+	// for (const Vector2D& coinPosition : coinsPositions) {
+	// 	Vector2D coin_coords = grid->cell2pix(coinPosition);
+	// 	int offset = CELL_SIZE / 2;
+	// 	SDL_Rect dstrect = { (int)coin_coords.x - offset, (int)coin_coords.y - offset, CELL_SIZE, CELL_SIZE };
+	// 	SDL_RenderCopy(TheApp::Instance()->getRenderer(), coin_texture, NULL, &dstrect);
+	// }
 }
 
 
