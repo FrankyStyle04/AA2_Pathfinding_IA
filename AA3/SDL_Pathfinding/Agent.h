@@ -3,12 +3,14 @@
 #include <minmax.h>
 #include <SDL.h>
 #include <SDL_image.h>
+
+#include "BlackBoard.h"
 #include "SDL_SimpleApp.h"
 #include "Path.h"
 #include "Vector2D.h"
 #include "Graph.h"
 #include "utils.h"
-
+#include "DecisionMakingAlgorithm.h"
 
 class Agent
 {
@@ -20,6 +22,9 @@ public:
 		virtual ~SteeringBehavior() {};
 		virtual void applySteeringForce(Agent *agent, float dtime) {};
 	};
+
+protected:
+	BlackBoard blackboard;
 private:
 	SteeringBehavior *steering_behaviour;
 	Vector2D position;
@@ -41,6 +46,9 @@ private:
 	int sprite_num_frames;
 	int sprite_w;
 	int sprite_h;
+
+	//Decision Making
+	DecisionMakingAlgorithm* brain;
 
 public:
 	Agent();
